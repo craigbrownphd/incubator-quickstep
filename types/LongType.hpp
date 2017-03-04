@@ -41,10 +41,8 @@ class Type;
 /**
  * @brief A type representing a 64-bit integer.
  **/
-class LongType : public NumericSuperType<std::int64_t> {
+class LongType : public NumericSuperType<kLong, std::int64_t> {
  public:
-  static const TypeID kStaticTypeID;
-
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
    *        Type.
@@ -110,7 +108,7 @@ class LongType : public NumericSuperType<std::int64_t> {
 
  private:
   explicit LongType(const bool nullable)
-      : NumericSuperType<std::int64_t>(kLong, nullable) {
+      : NumericSuperType<kLong, std::int64_t>(nullable) {
   }
 
   DISALLOW_COPY_AND_ASSIGN(LongType);

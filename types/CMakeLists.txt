@@ -52,6 +52,7 @@ add_library(quickstep_types_Type Type.cpp Type.hpp)
 add_library(quickstep_types_TypeErrors ../empty_src.cpp TypeErrors.hpp)
 add_library(quickstep_types_TypeFactory TypeFactory.cpp TypeFactory.hpp)
 add_library(quickstep_types_TypeID TypeID.cpp TypeID.hpp)
+add_library(quickstep_types_TypeUtil ../empty_src.cpp TypeUtil.hpp)
 add_library(quickstep_types_Type_proto ${types_Type_proto_srcs})
 add_library(quickstep_types_TypedValue TypedValue.cpp TypedValue.hpp)
 add_library(quickstep_types_TypedValue_proto ${types_TypedValue_proto_srcs})
@@ -182,6 +183,26 @@ target_link_libraries(quickstep_types_TypeFactory
                       quickstep_types_VarCharType
                       quickstep_types_YearMonthIntervalType
                       quickstep_utility_Macros)
+target_link_libraries(quickstep_types_TypeID
+                      quickstep_types_Type_proto
+                      quickstep_utility_Macros)
+target_link_libraries(quickstep_types_TypeUtil
+                      quickstep_types_CharType
+                      quickstep_types_DateType
+                      quickstep_types_DatetimeIntervalType
+                      quickstep_types_DatetimeType
+                      quickstep_types_DoubleType
+                      quickstep_types_FloatType
+                      quickstep_types_IntType
+                      quickstep_types_LongType
+                      quickstep_types_NullType
+                      quickstep_types_Type
+                      quickstep_types_TypeID
+                      quickstep_types_Type_proto
+                      quickstep_types_VarCharType
+                      quickstep_types_YearMonthIntervalType
+                      quickstep_utility_Macros
+                      quickstep_utility_TemplateUtil)
 target_link_libraries(quickstep_types_TypedValue
                       farmhash
                       glog
@@ -238,6 +259,7 @@ target_link_libraries(quickstep_types
                       quickstep_types_NumericSuperType
                       quickstep_types_NumericTypeUnifier
                       quickstep_types_Type
+                      quickstep_types_TypeUtil
                       quickstep_types_Type_proto
                       quickstep_types_TypeErrors
                       quickstep_types_TypeFactory

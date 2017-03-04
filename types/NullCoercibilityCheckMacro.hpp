@@ -34,7 +34,7 @@
  **/
 #define QUICKSTEP_NULL_COERCIBILITY_CHECK()               \
   do {                                                    \
-    if (original_type.isNullable() && !nullable_) {       \
+    if (original_type.isNullable() && !this->nullable_) {       \
       return false;                                       \
     } else if (original_type.getTypeID() == kNullType) {  \
       return true;                                        \

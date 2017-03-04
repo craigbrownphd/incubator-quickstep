@@ -40,12 +40,9 @@ namespace quickstep {
 /**
  * @brief A type representing the datetime interval.
  **/
-class DatetimeIntervalType : public Type {
+class DatetimeIntervalType :
+    public TypeConcept<kDatetimeInterval, false, kNativeEmbedded, DatetimeIntervalLit> {
  public:
-  typedef DatetimeIntervalLit cpptype;
-
-  static const TypeID kStaticTypeID = kDatetimeInterval;
-
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
    *        Type.
@@ -116,7 +113,9 @@ class DatetimeIntervalType : public Type {
 
  private:
   explicit DatetimeIntervalType(const bool nullable)
-      : Type(Type::kOther, kDatetimeInterval, nullable, sizeof(DatetimeIntervalLit), sizeof(DatetimeIntervalLit)) {
+      : TypeConcept<kDatetimeInterval, false, kNativeEmbedded, DatetimeIntervalLit>(
+             Type::kOther, kStaticTypeID, nullable,
+             sizeof(DatetimeIntervalLit), sizeof(DatetimeIntervalLit)) {
   }
 
   DISALLOW_COPY_AND_ASSIGN(DatetimeIntervalType);

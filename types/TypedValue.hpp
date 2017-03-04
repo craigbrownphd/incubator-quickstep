@@ -264,9 +264,9 @@ class TypedValue {
    *        TypedValue will take ownership of this memory.
    * @param value_size The number of bytes of data at value_ptr.
    **/
-  static TypedValue CreateWithOwnedData(const TypeID type_id,
-                                        void *value_ptr,
-                                        const std::size_t value_size) {
+  inline static TypedValue CreateWithOwnedData(const TypeID type_id,
+                                               void *value_ptr,
+                                               const std::size_t value_size) {
     TypedValue val(type_id, value_ptr, value_size);
     val.value_info_ |= kOwnershipMask;
     return val;
@@ -467,7 +467,8 @@ class TypedValue {
    * @return The underlying literal value represented by this TypedValue.
    **/
   template <typename LiteralType>
-  LiteralType getLiteral() const;
+  LiteralType getLiteral() const {
+  }
 
   /**
    * @brief Get the out-of-line data which this TypedValue points to.

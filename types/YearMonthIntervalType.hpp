@@ -39,12 +39,9 @@ namespace quickstep {
 /**
  * @brief A type representing the year-month interval.
  **/
-class YearMonthIntervalType : public Type {
+class YearMonthIntervalType :
+    public TypeConcept<kYearMonthInterval, false, kNativeEmbedded, YearMonthIntervalLit> {
  public:
-  typedef YearMonthIntervalLit cpptype;
-
-  static const TypeID kStaticTypeID = kYearMonthInterval;
-
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
    *        Type.
@@ -115,7 +112,9 @@ class YearMonthIntervalType : public Type {
 
  private:
   explicit YearMonthIntervalType(const bool nullable)
-      : Type(Type::kOther, kYearMonthInterval, nullable, sizeof(YearMonthIntervalLit), sizeof(YearMonthIntervalLit)) {
+      : TypeConcept<kYearMonthInterval, false, kNativeEmbedded, YearMonthIntervalLit>(
+            Type::kOther, kStaticTypeID, nullable,
+            sizeof(YearMonthIntervalLit), sizeof(YearMonthIntervalLit)) {
   }
 
   DISALLOW_COPY_AND_ASSIGN(YearMonthIntervalType);

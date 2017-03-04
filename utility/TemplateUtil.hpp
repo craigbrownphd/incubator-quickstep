@@ -30,8 +30,6 @@ namespace quickstep {
  *  @{
  */
 
-namespace template_util_inner {
-
 /**
  * @brief Represents a compile-time sequence of integers.
  *
@@ -59,6 +57,20 @@ template<std::size_t ...S>
 struct MakeSequence<0, S...> {
   typedef Sequence<S...> type;
 };
+
+template<class...> struct Disjunction : std::false_type {};
+template<class B1> struct Disjunction<B1> : B1 {};
+template<class B1, class... Bn>
+struct Disjunction<B1, Bn...>
+    : std::conditional_t<bool(B1::value), B1, Disjunction<Bn...>>  {};
+
+template <typename check, typename ...cases>
+struct EqualsAny {
+  static constexpr bool value =
+      Disjunction<std::is_same<check, cases>...>::value;
+};
+
+namespace template_util_inner {
 
 /**
  * @brief Final step of CreateBoolInstantiatedInstance. Now all bool_values are
@@ -125,7 +137,7 @@ inline ReturnT* CreateBoolInstantiatedInstance(Tuple &&args) {
   return template_util_inner::CreateBoolInstantiatedInstanceInner<
       T, ReturnT, bool_values...>(
           std::forward<Tuple>(args),
-          typename template_util_inner::MakeSequence<n_args>::type());
+          typename MakeSequence<n_args>::type());
 }
 
 /**
@@ -225,8 +237,27 @@ inline auto InvokeOnBools(ArgTypes ...args) {
   constexpr std::size_t last = sizeof...(args) - 1;
   return template_util_inner::InvokeOnBoolsInner<last>(
       std::forward_as_tuple(args...),
-      typename template_util_inner::MakeSequence<last>::type());
+      typename MakeSequence<last>::type());
 }
+
+
+template <char ...c>
+struct StringLiteral {
+  inline static std::string ToString() {
+    return std::string({c...});
+  }
+};
+
+template <typename LeftT, typename RightT>
+struct PairSelectorLeft {
+  typedef LeftT type;
+};
+
+template <typename LeftT, typename RightT>
+struct PairSelectorRight {
+  typedef RightT type;
+};
+
 
 /** @} */
 

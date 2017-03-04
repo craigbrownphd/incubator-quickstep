@@ -91,21 +91,22 @@ bool TypeFactory::ProtoIsValid(const serialization::Type &proto) {
   }
 
   // Check that the type_id is valid, and extensions if any.
-  switch (proto.type_id()) {
-    case serialization::Type::INT:
-    case serialization::Type::LONG:
-    case serialization::Type::FLOAT:
-    case serialization::Type::DOUBLE:
-    case serialization::Type::DATE:
-    case serialization::Type::DATETIME:
-    case serialization::Type::DATETIME_INTERVAL:
-    case serialization::Type::YEAR_MONTH_INTERVAL:
+  const TypeID type_id = TypeIDFactory::ReconstructFromProto(proto.type_id());
+  switch (type_id) {
+    case kInt:
+    case kLong:
+    case kFloat:
+    case kDouble:
+    case kDate:
+    case kDatetime:
+    case kDatetimeInterval:
+    case kYearMonthInterval:
       return true;
-    case serialization::Type::CHAR:
+    case kChar:
       return proto.HasExtension(serialization::CharType::length);
-    case serialization::Type::VAR_CHAR:
+    case kVarChar:
       return proto.HasExtension(serialization::VarCharType::length);
-    case serialization::Type::NULL_TYPE:
+    case kNullType:
       return proto.nullable();
     default:
       return false;
@@ -117,28 +118,29 @@ const Type& TypeFactory::ReconstructFromProto(const serialization::Type &proto) 
       << "Attempted to create Type from an invalid proto description:\n"
       << proto.DebugString();
 
-  switch (proto.type_id()) {
-    case serialization::Type::INT:
+  const TypeID type_id = TypeIDFactory::ReconstructFromProto(proto.type_id());
+  switch (type_id) {
+    case kInt:
       return IntType::Instance(proto.nullable());
-    case serialization::Type::LONG:
+    case kLong:
       return LongType::Instance(proto.nullable());
-    case serialization::Type::FLOAT:
+    case kFloat:
       return FloatType::Instance(proto.nullable());
-    case serialization::Type::DOUBLE:
+    case kDouble:
       return DoubleType::Instance(proto.nullable());
-    case serialization::Type::DATE:
+    case kDate:
       return DateType::Instance(proto.nullable());
-    case serialization::Type::DATETIME:
+    case kDatetime:
       return DatetimeType::Instance(proto.nullable());
-    case serialization::Type::DATETIME_INTERVAL:
+    case kDatetimeInterval:
       return DatetimeIntervalType::Instance(proto.nullable());
-    case serialization::Type::YEAR_MONTH_INTERVAL:
+    case kYearMonthInterval:
       return YearMonthIntervalType::Instance(proto.nullable());
-    case serialization::Type::CHAR:
+    case kChar:
       return CharType::InstanceFromProto(proto);
-    case serialization::Type::VAR_CHAR:
+    case kVarChar:
       return VarCharType::InstanceFromProto(proto);
-    case serialization::Type::NULL_TYPE:
+    case kNullType:
       DCHECK(proto.nullable());
       return NullType::InstanceNullable();
     default:

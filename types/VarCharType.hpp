@@ -43,7 +43,7 @@ namespace quickstep {
  *       character. This means that the VARCHAR(X) type requires from 1 to X+1
  *       bytes of storage, depending on string length.
  **/
-class VarCharType : public AsciiStringSuperType {
+class VarCharType : public AsciiStringSuperType<kVarChar, kOutOfLine> {
  public:
   /**
    * @brief Get a reference to the non-nullable singleton instance of this Type
@@ -137,7 +137,7 @@ class VarCharType : public AsciiStringSuperType {
 
  private:
   VarCharType(const std::size_t length, const bool nullable)
-      : AsciiStringSuperType(kVarChar, nullable, 1, length + 1, length) {
+      : AsciiStringSuperType<kVarChar, kOutOfLine>(nullable, 1, length + 1, length) {
   }
 
   template <bool nullable_internal>

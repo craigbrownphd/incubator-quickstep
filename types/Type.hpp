@@ -264,7 +264,7 @@ class Type {
    * @note It is NOT possible to coerce a nullable type to a non-nullable type,
    *       even if coercion would otherwise be possible.
    * @note Integer types are safely coercible to other integer or
-   *       floating-poin types of equal or greater length.
+   *       floating-point types of equal or greater length.
    * @note Floating-point types are safely coercible to other floating-point
    *       types of equal or greater precision.
    * @note ASCII string types are safely coercible to other ASCII string types
@@ -471,12 +471,59 @@ class Type {
   DISALLOW_COPY_AND_ASSIGN(Type);
 };
 
+template <TypeID type_id,
+          bool parameterized,
+          TypeStorageLayout layout,
+          typename CppType = void>
+class TypeConcept : public Type {
+ public:
+  static constexpr TypeID kStaticTypeID = type_id;
+  static constexpr bool kParameterized = parameterized;
+  static constexpr TypeStorageLayout kLayout = layout;
+
+  typedef CppType cpptype;
+
+ protected:
+  template <typename ...ArgTypes>
+  explicit TypeConcept(ArgTypes &&...args)
+      : Type(std::forward<ArgTypes>(args)...) {}
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TypeConcept);
+};
+
+
+template <TypeID type_id,
+          bool parameterized,
+          TypeStorageLayout layout,
+          typename CppType>
+constexpr TypeID TypeConcept<type_id, parameterized, layout, CppType>::kStaticTypeID;
+
+template <TypeID type_id,
+          bool parameterized,
+          TypeStorageLayout layout,
+          typename CppType>
+constexpr bool TypeConcept<type_id, parameterized, layout, CppType>::kParameterized;
+
+template <TypeID type_id,
+          bool parameterized,
+          TypeStorageLayout layout,
+          typename CppType>
+constexpr TypeStorageLayout TypeConcept<type_id, parameterized, layout, CppType>::kLayout;
+
 /**
  * @brief A superclass for ASCII string types.
  **/
-class AsciiStringSuperType : public Type {
+template <TypeID type_id, TypeStorageLayout layout>
+class AsciiStringSuperType : public TypeConcept<type_id, true, layout> {
  public:
-  bool isCoercibleFrom(const Type &original_type) const override;
+  bool isCoercibleFrom(const Type &original_type) const override {
+    if (original_type.isNullable() && !this->nullable_) {
+      return false;
+    }
+    return (original_type.getSuperTypeID() == Type::kAsciiString)
+           || (original_type.getTypeID() == kNullType);
+  }
 
   /**
    * @brief Get the character-length of this string type.
@@ -488,12 +535,12 @@ class AsciiStringSuperType : public Type {
   }
 
  protected:
-  AsciiStringSuperType(const TypeID type_id,
-                       const bool nullable,
+  AsciiStringSuperType(const bool nullable,
                        const std::size_t minimum_byte_length,
                        const std::size_t maximum_byte_length,
                        const std::size_t string_length)
-      : Type(Type::kAsciiString, type_id, nullable, minimum_byte_length, maximum_byte_length),
+      : TypeConcept<type_id, true, layout>(
+            Type::kAsciiString, type_id, nullable, minimum_byte_length, maximum_byte_length),
         length_(string_length) {
   }
 

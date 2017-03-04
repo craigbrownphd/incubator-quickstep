@@ -38,18 +38,16 @@ namespace quickstep {
  * @brief Templatized superclass for Numeric types. Contains code common to all
  *        Numeric types.
  **/
-template <typename CppType>
-class NumericSuperType : public Type {
+template <TypeID type_id, typename CppType>
+class NumericSuperType : public TypeConcept<type_id, false, kNativeEmbedded, CppType> {
  public:
-  typedef CppType cpptype;
-
   std::size_t estimateAverageByteLength() const override {
     return sizeof(CppType);
   }
 
   bool isCoercibleFrom(const Type &original_type) const override {
     QUICKSTEP_NULL_COERCIBILITY_CHECK();
-    return (original_type.getSuperTypeID() == kNumeric);
+    return (original_type.getSuperTypeID() == Type::kNumeric);
   }
 
   TypedValue makeZeroValue() const override {
@@ -57,8 +55,9 @@ class NumericSuperType : public Type {
   }
 
  protected:
-  NumericSuperType(const TypeID type_id, const bool nullable)
-      : Type(Type::kNumeric, type_id, nullable, sizeof(CppType), sizeof(CppType)) {
+  explicit NumericSuperType(const bool nullable)
+      : TypeConcept<type_id, false, kNativeEmbedded, CppType>(
+            Type::kNumeric, type_id, nullable, sizeof(CppType), sizeof(CppType)) {
   }
 
  private:

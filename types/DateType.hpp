@@ -40,12 +40,8 @@ class TypedValue;
 /**
  * @brief A type representing the date.
  **/
-class DateType : public Type {
+class DateType : public TypeConcept<kDate, false, kNativeEmbedded, DateLit> {
  public:
-  typedef DateLit cpptype;
-
-  static const TypeID kStaticTypeID = kDate;
-
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
    *        Type.
@@ -124,7 +120,9 @@ class DateType : public Type {
 
  private:
   explicit DateType(const bool nullable)
-      : Type(Type::kOther, kDate, nullable, sizeof(DateLit), sizeof(DateLit)) {
+      : TypeConcept<kDate, false, kNativeEmbedded, DateLit>(
+             Type::kOther, kStaticTypeID, nullable,
+             sizeof(DateLit), sizeof(DateLit)) {
   }
 
   DISALLOW_COPY_AND_ASSIGN(DateType);

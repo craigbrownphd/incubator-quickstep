@@ -48,10 +48,8 @@ class TypedValue;
  *       a particular operation may accept. It is also assumed that applying
  *       any operation to an argument of NullType always yields NULL values.
  **/
-class NullType : public Type {
+class NullType : public TypeConcept<kNullType, false, kNativeEmbedded> {
  public:
-  static const TypeID kStaticTypeID = kNullType;
-
   /**
    * @brief Get a reference to the nullable singleton instance of this Type.
    * @note Unlike other Types, there is no corresponding method to get a
@@ -106,7 +104,9 @@ class NullType : public Type {
  private:
   // NOTE(chasseur): NullType requires 0 bytes of inherent storage. It does,
   // however, require a bit in NULL bitmaps.
-  NullType() : Type(Type::kOther, kNullType, true, 0, 0) {
+  NullType()
+      : TypeConcept<kNullType, false, kNativeEmbedded>(
+            Type::kOther, kStaticTypeID, true, 0, 0) {
   }
 
   DISALLOW_COPY_AND_ASSIGN(NullType);

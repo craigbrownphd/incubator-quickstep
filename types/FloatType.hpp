@@ -40,10 +40,8 @@ class Type;
 /**
  * @brief A type representing a single-precision floating-point number.
  **/
-class FloatType : public NumericSuperType<float> {
+class FloatType : public NumericSuperType<kFloat, float> {
  public:
-  static const TypeID kStaticTypeID;
-
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
    *        Type.
@@ -122,7 +120,7 @@ class FloatType : public NumericSuperType<float> {
               // never takes more than 2 base-10 digits to represent.
 
   explicit FloatType(const bool nullable)
-      : NumericSuperType<float>(kFloat, nullable) {
+      : NumericSuperType<kFloat, float>(nullable) {
   }
 
   DISALLOW_COPY_AND_ASSIGN(FloatType);

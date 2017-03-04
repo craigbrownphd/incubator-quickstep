@@ -40,10 +40,8 @@ class Type;
 /**
  * @brief A type representing a 32-bit integer.
  **/
-class IntType : public NumericSuperType<int> {
+class IntType : public NumericSuperType<kInt, int> {
  public:
-  static const TypeID kStaticTypeID;
-
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
    *        Type.
@@ -109,7 +107,7 @@ class IntType : public NumericSuperType<int> {
 
  private:
   explicit IntType(const bool nullable)
-      : NumericSuperType<int>(kInt, nullable) {
+      : NumericSuperType<kInt, int>(nullable) {
   }
 
   DISALLOW_COPY_AND_ASSIGN(IntType);

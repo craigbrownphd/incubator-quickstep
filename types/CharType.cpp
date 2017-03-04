@@ -66,8 +66,7 @@ const CharType& CharType::InstanceFromProto(const serialization::Type &proto) {
 
 serialization::Type CharType::getProto() const {
   serialization::Type proto;
-  proto.set_type_id(serialization::Type::CHAR);
-
+  proto.mutable_type_id()->CopyFrom(TypeIDFactory::GetProto(type_id_));
   proto.set_nullable(nullable_);
 
   proto.SetExtension(serialization::CharType::length, length_);

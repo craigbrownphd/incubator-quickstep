@@ -41,8 +41,6 @@ using std::snprintf;
 
 namespace quickstep {
 
-const TypeID DoubleType::kStaticTypeID = kDouble;
-
 bool DoubleType::isSafelyCoercibleFrom(const Type &original_type) const {
   QUICKSTEP_NULL_COERCIBILITY_CHECK();
   return QUICKSTEP_EQUALS_ANY_CONSTANT(original_type.getTypeID(),

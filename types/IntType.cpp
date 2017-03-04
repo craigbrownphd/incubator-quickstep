@@ -32,8 +32,6 @@
 
 namespace quickstep {
 
-const TypeID IntType::kStaticTypeID = kInt;
-
 bool IntType::isSafelyCoercibleFrom(const Type &original_type) const {
   QUICKSTEP_NULL_COERCIBILITY_CHECK();
   return original_type.getTypeID() == kInt;
