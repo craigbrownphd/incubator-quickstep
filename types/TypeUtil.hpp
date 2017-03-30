@@ -44,10 +44,10 @@
 namespace quickstep {
 
 template <TypeID type_id>
-struct TypeGenerator {};
+struct TypeClass {};
 
 #define REGISTER_TYPE(T) \
-  template <> struct TypeGenerator<T::kStaticTypeID> { typedef T type; };
+  template <> struct TypeClass<T::kStaticTypeID> { typedef T type; };
 
 REGISTER_TYPE(IntType);
 REGISTER_TYPE(LongType);
@@ -69,11 +69,14 @@ template <bool require_parameterized>
 struct TypeIDSelectorParameterizedHelper {
   template <typename TypeIDConstant, typename FunctorT, typename EnableT = void>
   struct Implementation {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
     inline static auto Invoke(const FunctorT &functor)
         -> decltype(functor(TypeIDConstant())) {
-      DLOG(FATAL) << "Unexpected TypeID: "
-                  << kTypeNames[static_cast<int>(TypeIDConstant::value)];
+      LOG(FATAL) << "Unexpected TypeID: "
+                 << kTypeNames[static_cast<int>(TypeIDConstant::value)];
     }
+#pragma GCC diagnostic pop
   };
 };
 
@@ -81,7 +84,7 @@ template <bool require_non_parameterized>
 template <typename TypeIDConstant, typename FunctorT>
 struct TypeIDSelectorParameterizedHelper<require_non_parameterized>::Implementation<
     TypeIDConstant, FunctorT,
-    std::enable_if_t<TypeGenerator<TypeIDConstant::value>::type::kParameterized
+    std::enable_if_t<TypeClass<TypeIDConstant::value>::type::kParameterized
                          ^ require_non_parameterized>> {
   inline static auto Invoke(const FunctorT &functor) {
     return functor(TypeIDConstant());
@@ -109,11 +112,14 @@ template <TypeID ...candidates>
 struct TypeIDSelectorEqualsAny {
   template <typename TypeIDConstant, typename FunctorT, typename EnableT = void>
   struct Implementation {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
     inline static auto Invoke(const FunctorT &functor)
         -> decltype(functor(TypeIDConstant())) {
-      DLOG(FATAL) << "Unexpected TypeID: "
-                  << kTypeNames[static_cast<int>(TypeIDConstant::value)];
+      LOG(FATAL) << "Unexpected TypeID: "
+                 << kTypeNames[static_cast<int>(TypeIDConstant::value)];
     }
+#pragma GCC diagnostic pop
   };
 };
 
@@ -150,7 +156,7 @@ inline auto InvokeOnTypeID(const TypeID type_id,
     REGISTER_TYPE_ID(kVarChar);
     REGISTER_TYPE_ID(kNullType);
     default:
-      FATAL_ERROR("Unrecognized TypeID in InvokeOnTypeID()");
+      LOG(FATAL) << "Unrecognized TypeID in InvokeOnTypeID()";
   }
 
 #undef REGISTER_TYPE_ID
@@ -162,7 +168,7 @@ class TypeUtil {
     return InvokeOnTypeID(
         type_id,
         [&](auto tid) -> bool {  // NOLINT(build/c++11)
-      return TypeGenerator<decltype(tid)::value>::type::kParameterized;
+      return TypeClass<decltype(tid)::value>::type::kParameterized;
     });
   }
 

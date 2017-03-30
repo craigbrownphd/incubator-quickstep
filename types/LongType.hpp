@@ -41,7 +41,7 @@ class Type;
 /**
  * @brief A type representing a 64-bit integer.
  **/
-class LongType : public NumericSuperType<kLong, std::int64_t> {
+class LongType : public NumericSuperType<LongType, kLong, std::int64_t> {
  public:
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
@@ -78,14 +78,6 @@ class LongType : public NumericSuperType<kLong, std::int64_t> {
     }
   }
 
-  const Type& getNullableVersion() const override {
-    return InstanceNullable();
-  }
-
-  const Type& getNonNullableVersion() const override {
-    return InstanceNonNullable();
-  }
-
   bool isSafelyCoercibleFrom(const Type &original_type) const override;
 
   // Fully represented digits, single leading digit, and possible '-'
@@ -108,7 +100,7 @@ class LongType : public NumericSuperType<kLong, std::int64_t> {
 
  private:
   explicit LongType(const bool nullable)
-      : NumericSuperType<kLong, std::int64_t>(nullable) {
+      : NumericSuperType<LongType, kLong, std::int64_t>(nullable) {
   }
 
   DISALLOW_COPY_AND_ASSIGN(LongType);

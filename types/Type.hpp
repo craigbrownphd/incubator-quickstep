@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <string>
+#include <type_traits>
 
 #include "types/Type.pb.h"
 #include "types/TypeID.hpp"
@@ -112,7 +113,7 @@ class Type {
    *
    * @return The serialized Protocol Buffer representation of this Type.
    **/
-  virtual serialization::Type getProto() const;
+  virtual serialization::Type getProto() const = 0;
 
   /**
    * @brief Determine what supertype this type belongs to.
@@ -154,16 +155,7 @@ class Type {
     TypeSignature sig;
     sig.id = type_id_;
     sig.nullable = nullable_;
-    switch (type_id_) {
-      case kChar:
-        sig.length = maximum_byte_length_;
-        break;
-      case kVarChar:
-        sig.length = maximum_byte_length_ - 1;
-        break;
-      default:
-        sig.length = 0;
-    }
+    sig.length = parameter_;
     return sig;
   }
 
@@ -255,7 +247,7 @@ class Type {
    * @param original_type The original Type for coercion to this Type.
    * @return true if coercion is supported, false otherwise.
    **/
-  virtual bool isCoercibleFrom(const Type &original_type) const = 0;
+  virtual bool isCoercibleFrom(const Type &original_type) const;
 
   /**
    * @brief Determine whether data items of another type can be coerced (used
@@ -277,7 +269,7 @@ class Type {
    * @param original_type The original Type for coercion to this Type.
    * @return true if coercion is supported, false otherwise.
    **/
-  virtual bool isSafelyCoercibleFrom(const Type &original_type) const = 0;
+  virtual bool isSafelyCoercibleFrom(const Type &original_type) const;
 
   /**
    * @brief Determine whether data items of this type are always guaranteed to
@@ -348,7 +340,7 @@ class Type {
    **/
   virtual void printValueToFile(const TypedValue &value,
                                 FILE *file,
-                                const int padding = 0) const = 0;
+                                const int padding = 0) const;
 
   /**
    * @brief Make a TypedValue of this Type.
@@ -453,10 +445,12 @@ class Type {
        const TypeID type_id,
        const bool nullable,
        const std::size_t minimum_byte_length,
-       const std::size_t maximum_byte_length)
+       const std::size_t maximum_byte_length,
+       const std::size_t parameter = 0)
       : super_type_id_(super_type_id),
         type_id_(type_id),
         nullable_(nullable),
+        parameter_(parameter),
         minimum_byte_length_(minimum_byte_length),
         maximum_byte_length_(maximum_byte_length) {
   }
@@ -464,6 +458,7 @@ class Type {
   const SuperTypeID super_type_id_;
   const TypeID type_id_;
   const bool nullable_;
+  const std::size_t parameter_;
   const std::size_t minimum_byte_length_;
   const std::size_t maximum_byte_length_;
 
@@ -471,11 +466,10 @@ class Type {
   DISALLOW_COPY_AND_ASSIGN(Type);
 };
 
-template <TypeID type_id,
-          bool parameterized,
-          TypeStorageLayout layout,
+template <typename TypeClass, TypeID type_id,
+          bool parameterized, TypeStorageLayout layout,
           typename CppType = void>
-class TypeConcept : public Type {
+class TypeSynthesizer : public Type {
  public:
   static constexpr TypeID kStaticTypeID = type_id;
   static constexpr bool kParameterized = parameterized;
@@ -483,72 +477,62 @@ class TypeConcept : public Type {
 
   typedef CppType cpptype;
 
+  serialization::Type getProto() const override {
+    serialization::Type proto;
+
+    proto.mutable_type_id()->CopyFrom(TypeIDFactory::GetProto(type_id_));
+    proto.set_nullable(nullable_);
+
+    if (kParameterized) {
+      proto.set_length(parameter_);
+    }
+
+    return proto;
+  }
+
+  const Type& getNullableVersion() const override {
+    return getInstance<kParameterized>(true);
+  }
+
+  const Type& getNonNullableVersion() const override {
+    return getInstance<kParameterized>(false);
+  }
+
  protected:
   template <typename ...ArgTypes>
-  explicit TypeConcept(ArgTypes &&...args)
+  explicit TypeSynthesizer(ArgTypes &&...args)
       : Type(std::forward<ArgTypes>(args)...) {}
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(TypeConcept);
+  template <bool has_param>
+  inline const Type& getInstance(const bool nullable,
+                                 std::enable_if_t<has_param>* = 0) const {
+    return TypeClass::Instance(parameter_, nullable);
+  }
+
+  template <bool has_param>
+  inline const Type& getInstance(const bool nullable,
+                                 std::enable_if_t<!has_param>* = 0) const {
+    return TypeClass::Instance(nullable);
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(TypeSynthesizer);
 };
 
+template <typename TypeClass, TypeID type_id,
+          bool parameterized, TypeStorageLayout layout, typename CppType>
+constexpr TypeID TypeSynthesizer<
+    TypeClass, type_id, parameterized, layout, CppType>::kStaticTypeID;
 
-template <TypeID type_id,
-          bool parameterized,
-          TypeStorageLayout layout,
-          typename CppType>
-constexpr TypeID TypeConcept<type_id, parameterized, layout, CppType>::kStaticTypeID;
+template <typename TypeClass, TypeID type_id,
+          bool parameterized, TypeStorageLayout layout, typename CppType>
+constexpr bool TypeSynthesizer<
+    TypeClass, type_id, parameterized, layout, CppType>::kParameterized;
 
-template <TypeID type_id,
-          bool parameterized,
-          TypeStorageLayout layout,
-          typename CppType>
-constexpr bool TypeConcept<type_id, parameterized, layout, CppType>::kParameterized;
-
-template <TypeID type_id,
-          bool parameterized,
-          TypeStorageLayout layout,
-          typename CppType>
-constexpr TypeStorageLayout TypeConcept<type_id, parameterized, layout, CppType>::kLayout;
-
-/**
- * @brief A superclass for ASCII string types.
- **/
-template <TypeID type_id, TypeStorageLayout layout>
-class AsciiStringSuperType : public TypeConcept<type_id, true, layout> {
- public:
-  bool isCoercibleFrom(const Type &original_type) const override {
-    if (original_type.isNullable() && !this->nullable_) {
-      return false;
-    }
-    return (original_type.getSuperTypeID() == Type::kAsciiString)
-           || (original_type.getTypeID() == kNullType);
-  }
-
-  /**
-   * @brief Get the character-length of this string type.
-   *
-   * @return The maximum length of a string of this type.
-   **/
-  inline std::size_t getStringLength() const {
-    return length_;
-  }
-
- protected:
-  AsciiStringSuperType(const bool nullable,
-                       const std::size_t minimum_byte_length,
-                       const std::size_t maximum_byte_length,
-                       const std::size_t string_length)
-      : TypeConcept<type_id, true, layout>(
-            Type::kAsciiString, type_id, nullable, minimum_byte_length, maximum_byte_length),
-        length_(string_length) {
-  }
-
-  const std::size_t length_;
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(AsciiStringSuperType);
-};
+template <typename TypeClass, TypeID type_id,
+          bool parameterized, TypeStorageLayout layout, typename CppType>
+constexpr TypeStorageLayout TypeSynthesizer<
+    TypeClass, type_id, parameterized, layout, CppType>::kLayout;
 
 /** @} */
 

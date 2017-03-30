@@ -48,7 +48,7 @@ class TypedValue;
  *       a particular operation may accept. It is also assumed that applying
  *       any operation to an argument of NullType always yields NULL values.
  **/
-class NullType : public TypeConcept<kNullType, false, kNativeEmbedded> {
+class NullType : public TypeSynthesizer<NullType, kNullType, false, kNativeEmbedded> {
  public:
   /**
    * @brief Get a reference to the nullable singleton instance of this Type.
@@ -62,12 +62,13 @@ class NullType : public TypeConcept<kNullType, false, kNativeEmbedded> {
     return instance;
   }
 
-  const Type& getNullableVersion() const override {
-    return InstanceNullable();
-  }
-
-  const Type& getNonNullableVersion() const override {
-    LOG(FATAL) << "Called NullType::getNonNullableVersion(), which is not allowed.";
+  static const NullType& Instance(const bool nullable) {
+    if (nullable) {
+      return InstanceNullable();
+    } else {
+      LOG(FATAL) << "Called NullType::Instance(nullable = true), "
+                 << "which is not allowed.";
+    }
   }
 
   std::size_t estimateAverageByteLength() const override {
@@ -105,7 +106,7 @@ class NullType : public TypeConcept<kNullType, false, kNativeEmbedded> {
   // NOTE(chasseur): NullType requires 0 bytes of inherent storage. It does,
   // however, require a bit in NULL bitmaps.
   NullType()
-      : TypeConcept<kNullType, false, kNativeEmbedded>(
+      : TypeSynthesizer<NullType, kNullType, false, kNativeEmbedded>(
             Type::kOther, kStaticTypeID, true, 0, 0) {
   }
 

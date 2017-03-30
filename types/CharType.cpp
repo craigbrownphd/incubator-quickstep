@@ -60,19 +60,6 @@ const CharType& CharType::InstanceNullable(const std::size_t length) {
   return InstanceInternal<true>(length);
 }
 
-const CharType& CharType::InstanceFromProto(const serialization::Type &proto) {
-  return Instance(proto.GetExtension(serialization::CharType::length), proto.nullable());
-}
-
-serialization::Type CharType::getProto() const {
-  serialization::Type proto;
-  proto.mutable_type_id()->CopyFrom(TypeIDFactory::GetProto(type_id_));
-  proto.set_nullable(nullable_);
-
-  proto.SetExtension(serialization::CharType::length, length_);
-  return proto;
-}
-
 bool CharType::isSafelyCoercibleFrom(const Type &original_type) const {
   QUICKSTEP_NULL_COERCIBILITY_CHECK();
 

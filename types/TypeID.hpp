@@ -49,7 +49,7 @@ enum TypeID : int {
 };
 
 enum TypeStorageLayout {
-  kNativeEmbedded,
+  kNativeEmbedded = 0,
   kNativeInline,
   kNonNativeInline,
   kOutOfLine

@@ -226,7 +226,7 @@ OperationFactory::ResolveStatus OperationFactory::resolveOperationWithPartialTyp
         coerced_static_args.emplace_back(arg_value);
       } else {
         const Type *expected_type = nullptr;
-        if (TypeUtil::IsParameterized(expected_type_id)) {
+        if (TypeFactory::TypeRequiresLengthParameter(expected_type_id)) {
           // TODO: refactor type system to make this coercion extensible.
           if (expected_type_id == kChar && arg_type.getTypeID() == kVarChar) {
             expected_type = &TypeFactory::GetType(

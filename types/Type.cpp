@@ -28,12 +28,24 @@
 
 namespace quickstep {
 
-serialization::Type Type::getProto() const {
-  serialization::Type proto;
-  proto.mutable_type_id()->CopyFrom(TypeIDFactory::GetProto(type_id_));
-  proto.set_nullable(nullable_);
+bool Type::isCoercibleFrom(const Type &original_type) const {
+  return isSafelyCoercibleFrom(original_type);
+}
 
-  return proto;
+bool Type::isSafelyCoercibleFrom(const Type &original_type) const {
+  if (original_type.isNullable() && !this->nullable_) {
+    return false;
+  }
+  if (original_type.getTypeID() == kNullType) {
+    return true;
+  }
+  return (original_type.getTypeID() == type_id_);
+}
+
+void Type::printValueToFile(const TypedValue &value,
+                            FILE *file,
+                            const int padding) const {
+  std::fprintf(file, "%*s", padding, printValueToString(value).c_str());
 }
 
 TypedValue Type::coerceValue(const TypedValue &original_value,

@@ -41,7 +41,8 @@ namespace quickstep {
  * @brief A type representing the datetime interval.
  **/
 class DatetimeIntervalType :
-    public TypeConcept<kDatetimeInterval, false, kNativeEmbedded, DatetimeIntervalLit> {
+    public TypeSynthesizer<DatetimeIntervalType, kDatetimeInterval,
+                           false, kNativeEmbedded, DatetimeIntervalLit> {
  public:
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
@@ -78,31 +79,15 @@ class DatetimeIntervalType :
     }
   }
 
-  const Type& getNullableVersion() const override {
-    return InstanceNullable();
-  }
-
-  const Type& getNonNullableVersion() const override {
-    return InstanceNonNullable();
-  }
-
   std::size_t estimateAverageByteLength() const override {
     return sizeof(DatetimeIntervalLit);
   }
-
-  bool isCoercibleFrom(const Type &original_type) const override;
-
-  bool isSafelyCoercibleFrom(const Type &original_type) const override;
 
   int getPrintWidth() const override {
     return DatetimeIntervalLit::kPrintingChars;
   }
 
   std::string printValueToString(const TypedValue &value) const override;
-
-  void printValueToFile(const TypedValue &value,
-                        FILE *file,
-                        const int padding = 0) const override;
 
   TypedValue makeZeroValue() const override {
     return TypedValue(DatetimeIntervalLit{0});
@@ -113,7 +98,8 @@ class DatetimeIntervalType :
 
  private:
   explicit DatetimeIntervalType(const bool nullable)
-      : TypeConcept<kDatetimeInterval, false, kNativeEmbedded, DatetimeIntervalLit>(
+      : TypeSynthesizer<DatetimeIntervalType, kDatetimeInterval,
+                        false, kNativeEmbedded, DatetimeIntervalLit>(
              Type::kOther, kStaticTypeID, nullable,
              sizeof(DatetimeIntervalLit), sizeof(DatetimeIntervalLit)) {
   }

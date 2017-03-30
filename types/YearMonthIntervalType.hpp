@@ -40,7 +40,8 @@ namespace quickstep {
  * @brief A type representing the year-month interval.
  **/
 class YearMonthIntervalType :
-    public TypeConcept<kYearMonthInterval, false, kNativeEmbedded, YearMonthIntervalLit> {
+    public TypeSynthesizer<YearMonthIntervalType, kYearMonthInterval,
+                           false, kNativeEmbedded, YearMonthIntervalLit> {
  public:
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
@@ -77,31 +78,15 @@ class YearMonthIntervalType :
     }
   }
 
-  const Type& getNullableVersion() const override {
-    return InstanceNullable();
-  }
-
-  const Type& getNonNullableVersion() const override {
-    return InstanceNonNullable();
-  }
-
   std::size_t estimateAverageByteLength() const override {
     return sizeof(YearMonthIntervalLit);
   }
-
-  bool isCoercibleFrom(const Type &original_type) const override;
-
-  bool isSafelyCoercibleFrom(const Type &original_type) const override;
 
   int getPrintWidth() const override {
     return YearMonthIntervalLit::kPrintingChars;
   }
 
   std::string printValueToString(const TypedValue &value) const override;
-
-  void printValueToFile(const TypedValue &value,
-                        FILE *file,
-                        const int padding = 0) const override;
 
   TypedValue makeZeroValue() const override {
     return TypedValue(YearMonthIntervalLit{0});
@@ -112,7 +97,8 @@ class YearMonthIntervalType :
 
  private:
   explicit YearMonthIntervalType(const bool nullable)
-      : TypeConcept<kYearMonthInterval, false, kNativeEmbedded, YearMonthIntervalLit>(
+      : TypeSynthesizer<YearMonthIntervalType, kYearMonthInterval,
+                        false, kNativeEmbedded, YearMonthIntervalLit>(
             Type::kOther, kStaticTypeID, nullable,
             sizeof(YearMonthIntervalLit), sizeof(YearMonthIntervalLit)) {
   }

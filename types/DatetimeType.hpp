@@ -40,7 +40,8 @@ class TypedValue;
 /**
  * @brief A type representing the datetime.
  **/
-class DatetimeType : public TypeConcept<kDatetime, false, kNativeEmbedded, DatetimeLit> {
+class DatetimeType
+    : public TypeSynthesizer<DatetimeType, kDatetime, false, kNativeEmbedded, DatetimeLit> {
  public:
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
@@ -77,31 +78,15 @@ class DatetimeType : public TypeConcept<kDatetime, false, kNativeEmbedded, Datet
     }
   }
 
-  const Type& getNullableVersion() const override {
-    return InstanceNullable();
-  }
-
-  const Type& getNonNullableVersion() const override {
-    return InstanceNonNullable();
-  }
-
   std::size_t estimateAverageByteLength() const override {
     return sizeof(DatetimeLit);
   }
-
-  bool isCoercibleFrom(const Type &original_type) const override;
-
-  bool isSafelyCoercibleFrom(const Type &original_type) const override;
 
   int getPrintWidth() const override {
     return DatetimeLit::kIsoChars;
   }
 
   std::string printValueToString(const TypedValue &value) const override;
-
-  void printValueToFile(const TypedValue &value,
-                        FILE *file,
-                        const int padding = 0) const override;
 
   /**
    * @note value_string is expected to be in (possibly extended) ISO-8601
@@ -128,7 +113,7 @@ class DatetimeType : public TypeConcept<kDatetime, false, kNativeEmbedded, Datet
 
  private:
   explicit DatetimeType(const bool nullable)
-      : TypeConcept<kDatetime, false, kNativeEmbedded, quickstep::DatetimeLit>(
+      : TypeSynthesizer<DatetimeType, kDatetime, false, kNativeEmbedded, DatetimeLit>(
              Type::kOther, kStaticTypeID, nullable,
              sizeof(DatetimeLit), sizeof(DatetimeLit)) {
   }

@@ -26,22 +26,6 @@ message TypeID {
 message Type {
   required TypeID type_id = 1;
   required bool nullable = 2;
-
-  // The convention for extension numbering is that extensions for a particular
-  // TypeID should begin from (type_id + 1) * 32.
-  extensions 32 to max;
+  optional uint64 length = 3;
 }
 
-message CharType {
-  extend Type {
-    // Required when type_id == CHAR.
-    optional uint64 length = 160;
-  }
-}
-
-message VarCharType {
-  extend Type {
-    // Required when type_id == VAR_CHAR.
-    optional uint64 length = 192;
-  }
-}

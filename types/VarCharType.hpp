@@ -24,8 +24,8 @@
 #include <cstdio>
 #include <string>
 
+#include "types/AsciiStringSuperType.hpp"
 #include "types/Type.hpp"
-#include "types/Type.pb.h"
 #include "types/TypeID.hpp"
 #include "types/TypedValue.hpp"
 #include "utility/Macros.hpp"
@@ -43,7 +43,7 @@ namespace quickstep {
  *       character. This means that the VARCHAR(X) type requires from 1 to X+1
  *       bytes of storage, depending on string length.
  **/
-class VarCharType : public AsciiStringSuperType<kVarChar, kOutOfLine> {
+class VarCharType : public AsciiStringSuperType<VarCharType, kVarChar, kOutOfLine> {
  public:
   /**
    * @brief Get a reference to the non-nullable singleton instance of this Type
@@ -83,32 +83,6 @@ class VarCharType : public AsciiStringSuperType<kVarChar, kOutOfLine> {
   }
 
   /**
-   * @brief Get a reference to the singleton instance of this Type described
-   *        by the given Protocol Buffer serialization.
-   *
-   * @param type The serialized Protocol Buffer representation of the desired
-   *        VarCharType.
-   * @return A reference to the singleton instance of this Type for the given
-   *         Protocol Buffer.
-   **/
-  static const VarCharType& InstanceFromProto(const serialization::Type &type);
-
-  /**
-   * @brief Generate a serialized Protocol Buffer representation of this Type.
-   *
-   * @return The serialized Protocol Buffer representation of this Type.
-   **/
-  serialization::Type getProto() const override;
-
-  const Type& getNullableVersion() const override {
-    return InstanceNullable(length_);
-  }
-
-  const Type& getNonNullableVersion() const override {
-    return InstanceNonNullable(length_);
-  }
-
-  /**
    * @note Includes an extra byte for a terminating null character.
    **/
   std::size_t estimateAverageByteLength() const override;
@@ -137,7 +111,8 @@ class VarCharType : public AsciiStringSuperType<kVarChar, kOutOfLine> {
 
  private:
   VarCharType(const std::size_t length, const bool nullable)
-      : AsciiStringSuperType<kVarChar, kOutOfLine>(nullable, 1, length + 1, length) {
+      : AsciiStringSuperType<VarCharType, kVarChar, kOutOfLine>(
+            nullable, 1, length + 1, length) {
   }
 
   template <bool nullable_internal>

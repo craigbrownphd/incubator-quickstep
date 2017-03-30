@@ -32,6 +32,7 @@ QS_PROTOBUF_GENERATE_CPP(types_TypedValue_proto_srcs types_TypedValue_proto_hdrs
 QS_PROTOBUF_GENERATE_CPP(types_Type_proto_srcs types_Type_proto_hdrs Type.proto)
 
 # Declare micro-libs:
+add_library(quickstep_types_AsciiStringSuperType ../empty_src.cpp AsciiStringSuperType.hpp)
 add_library(quickstep_types_CharType CharType.cpp CharType.hpp)
 add_library(quickstep_types_DateOperatorOverloads ../empty_src.cpp DateOperatorOverloads.hpp)
 add_library(quickstep_types_DateType DateType.cpp DateType.hpp)
@@ -60,6 +61,9 @@ add_library(quickstep_types_VarCharType VarCharType.cpp VarCharType.hpp)
 add_library(quickstep_types_YearMonthIntervalType YearMonthIntervalType.cpp YearMonthIntervalType.hpp)
 
 # Link dependencies:
+target_link_libraries(quickstep_types_AsciiStringSuperType
+                      quickstep_types_Type
+                      quickstep_types_TypeID)
 target_link_libraries(quickstep_types_CharType
                       glog
                       quickstep_types_NullCoercibilityCheckMacro
@@ -78,7 +82,6 @@ target_link_libraries(quickstep_types_DateOperatorOverloads
 target_link_libraries(quickstep_types_DateType
                       glog
                       quickstep_types_DatetimeLit
-                      quickstep_types_NullCoercibilityCheckMacro
                       quickstep_types_Type
                       quickstep_types_TypeID
                       quickstep_types_TypedValue
@@ -88,7 +91,6 @@ target_link_libraries(quickstep_types_DatetimeIntervalType
                       glog
                       quickstep_types_IntervalLit
                       quickstep_types_IntervalParser
-                      quickstep_types_NullCoercibilityCheckMacro
                       quickstep_types_Type
                       quickstep_types_TypeID
                       quickstep_types_TypedValue
@@ -99,7 +101,6 @@ target_link_libraries(quickstep_types_DatetimeLit
 target_link_libraries(quickstep_types_DatetimeType
                       glog
                       quickstep_types_DatetimeLit
-                      quickstep_types_NullCoercibilityCheckMacro
                       quickstep_types_Type
                       quickstep_types_TypeID
                       quickstep_types_TypedValue
@@ -146,9 +147,6 @@ target_link_libraries(quickstep_types_LongType
                       quickstep_types_TypedValue
                       quickstep_utility_EqualsAnyConstant
                       quickstep_utility_Macros)
-target_link_libraries(quickstep_types_NullCoercibilityCheckMacro
-                      quickstep_types_Type
-                      quickstep_types_TypeID)
 target_link_libraries(quickstep_types_NullType
                       glog
                       quickstep_types_Type
@@ -232,7 +230,6 @@ target_link_libraries(quickstep_types_VarCharType
 target_link_libraries(quickstep_types_YearMonthIntervalType
                       quickstep_types_IntervalLit
                       quickstep_types_IntervalParser
-                      quickstep_types_NullCoercibilityCheckMacro
                       quickstep_types_Type
                       quickstep_types_TypeID
                       quickstep_types_TypedValue
@@ -242,6 +239,7 @@ target_link_libraries(quickstep_types_YearMonthIntervalType
 # Module all-in-one library:
 add_library(quickstep_types ../empty_src.cpp TypesModule.hpp)
 target_link_libraries(quickstep_types
+                      quickstep_types_AsciiStringSuperType
                       quickstep_types_CharType
                       quickstep_types_DateOperatorOverloads
                       quickstep_types_DateType

@@ -40,7 +40,7 @@ class Type;
 /**
  * @brief A type representing a 32-bit integer.
  **/
-class IntType : public NumericSuperType<kInt, int> {
+class IntType : public NumericSuperType<IntType, kInt, int> {
  public:
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
@@ -77,14 +77,6 @@ class IntType : public NumericSuperType<kInt, int> {
     }
   }
 
-  const Type& getNullableVersion() const override {
-    return InstanceNullable();
-  }
-
-  const Type& getNonNullableVersion() const override {
-    return InstanceNonNullable();
-  }
-
   bool isSafelyCoercibleFrom(const Type &original_type) const override;
 
   int getPrintWidth() const override {
@@ -107,7 +99,7 @@ class IntType : public NumericSuperType<kInt, int> {
 
  private:
   explicit IntType(const bool nullable)
-      : NumericSuperType<kInt, int>(nullable) {
+      : NumericSuperType<IntType, kInt, int>(nullable) {
   }
 
   DISALLOW_COPY_AND_ASSIGN(IntType);

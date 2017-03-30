@@ -60,6 +60,13 @@ template <typename ArgumentT, typename ResultT,
 using CMathUnaryFunctor =
     typename CMathUnaryFunctorWrapper<ArgumentT, ResultT, f, FunctorNameT>::type;
 
+inline std::int64_t CMathRound(const float arg) {
+  return std::llround(arg);
+}
+inline std::int64_t CMathRound(const double arg) {
+  return std::llround(arg);
+}
+
 using CMathUnaryFunctorPack = FunctorPack<
 // abs
     CMathUnaryFunctor<IntType, IntType,
@@ -97,9 +104,9 @@ using CMathUnaryFunctorPack = FunctorPack<
                       std::floor, StringLiteral<'f','l','o','o','r'>>,
 // round
     CMathUnaryFunctor<FloatType, LongType,
-                      std::llround, StringLiteral<'r','o','u','n','d'>>,
+                      CMathRound, StringLiteral<'r','o','u','n','d'>>,
     CMathUnaryFunctor<DoubleType, LongType,
-                      std::llround, StringLiteral<'r','o','u','n','d'>>
+                      CMathRound, StringLiteral<'r','o','u','n','d'>>
 >;
 
 /** @} */

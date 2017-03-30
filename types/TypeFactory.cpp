@@ -34,6 +34,7 @@
 #include "types/Type.hpp"
 #include "types/Type.pb.h"
 #include "types/TypeID.hpp"
+#include "types/TypeUtil.hpp"
 #include "types/VarCharType.hpp"
 #include "types/YearMonthIntervalType.hpp"
 #include "utility/Macros.hpp"
@@ -42,46 +43,35 @@
 
 namespace quickstep {
 
+bool TypeFactory::TypeRequiresLengthParameter(const TypeID id) {
+  return TypeUtil::IsParameterized(id);
+}
+
 const Type& TypeFactory::GetType(const TypeID id,
                                  const bool nullable) {
-  switch (id) {
-    case kInt:
-      return IntType::Instance(nullable);
-    case kLong:
-      return LongType::Instance(nullable);
-    case kFloat:
-      return FloatType::Instance(nullable);
-    case kDouble:
-      return DoubleType::Instance(nullable);
-    case kDate:
-      return DateType::Instance(nullable);
-    case kDatetime:
-      return DatetimeType::Instance(nullable);
-    case kDatetimeInterval:
-      return DatetimeIntervalType::Instance(nullable);
-    case kYearMonthInterval:
-      return YearMonthIntervalType::Instance(nullable);
-    case kNullType:
-      DCHECK(nullable);
-      return NullType::InstanceNullable();
-    default:
-      FATAL_ERROR("Called TypeFactory::GetType() for a type which requires "
-                  " a length parameter without specifying one.");
-  }
+  DCHECK(!TypeRequiresLengthParameter(id))
+      << "Called TypeFactory::GetType() for a type which requires "
+      << " a length parameter without specifying one.";
+
+  return *InvokeOnTypeID<TypeIDSelectorNonParameterized>(
+      id,
+      [&](auto id) -> const Type* {  // NOLINT(build/c++11)
+    return &TypeClass<decltype(id)::value>::type::Instance(nullable);
+  });
 }
 
 const Type& TypeFactory::GetType(const TypeID id,
                                  const std::size_t length,
                                  const bool nullable) {
-  switch (id) {
-    case kChar:
-      return CharType::Instance(length, nullable);
-    case kVarChar:
-      return VarCharType::Instance(length, nullable);
-    default:
-      FATAL_ERROR("Provided a length parameter to TypeFactory::GetType() for "
-                  "a type which does not take one.");
-  }
+  DCHECK(TypeRequiresLengthParameter(id))
+      << "Provided a length parameter to TypeFactory::GetType() for "
+      << "a type which does not take one.";
+
+  return *InvokeOnTypeID<TypeIDSelectorParameterized>(
+      id,
+      [&](auto id) -> const Type* {  // NOLINT(build/c++11)
+    return &TypeClass<decltype(id)::value>::type::Instance(nullable, length);
+  });
 }
 
 bool TypeFactory::ProtoIsValid(const serialization::Type &proto) {
@@ -90,27 +80,18 @@ bool TypeFactory::ProtoIsValid(const serialization::Type &proto) {
     return false;
   }
 
-  // Check that the type_id is valid, and extensions if any.
+  // Check that the type_id is valid, and has length if parameterized.
   const TypeID type_id = TypeIDFactory::ReconstructFromProto(proto.type_id());
-  switch (type_id) {
-    case kInt:
-    case kLong:
-    case kFloat:
-    case kDouble:
-    case kDate:
-    case kDatetime:
-    case kDatetimeInterval:
-    case kYearMonthInterval:
-      return true;
-    case kChar:
-      return proto.HasExtension(serialization::CharType::length);
-    case kVarChar:
-      return proto.HasExtension(serialization::VarCharType::length);
-    case kNullType:
-      return proto.nullable();
-    default:
-      return false;
+
+  if (type_id == kNullType) {
+    return proto.nullable();
   }
+
+  if (TypeRequiresLengthParameter(type_id)) {
+    return proto.has_length();
+  }
+
+  return true;
 }
 
 const Type& TypeFactory::ReconstructFromProto(const serialization::Type &proto) {
@@ -119,32 +100,11 @@ const Type& TypeFactory::ReconstructFromProto(const serialization::Type &proto) 
       << proto.DebugString();
 
   const TypeID type_id = TypeIDFactory::ReconstructFromProto(proto.type_id());
-  switch (type_id) {
-    case kInt:
-      return IntType::Instance(proto.nullable());
-    case kLong:
-      return LongType::Instance(proto.nullable());
-    case kFloat:
-      return FloatType::Instance(proto.nullable());
-    case kDouble:
-      return DoubleType::Instance(proto.nullable());
-    case kDate:
-      return DateType::Instance(proto.nullable());
-    case kDatetime:
-      return DatetimeType::Instance(proto.nullable());
-    case kDatetimeInterval:
-      return DatetimeIntervalType::Instance(proto.nullable());
-    case kYearMonthInterval:
-      return YearMonthIntervalType::Instance(proto.nullable());
-    case kChar:
-      return CharType::InstanceFromProto(proto);
-    case kVarChar:
-      return VarCharType::InstanceFromProto(proto);
-    case kNullType:
-      DCHECK(proto.nullable());
-      return NullType::InstanceNullable();
-    default:
-      FATAL_ERROR("Unrecognized TypeID in TypeFactory::ReconstructFromProto");
+
+  if (TypeRequiresLengthParameter(type_id)) {
+    return GetType(type_id, proto.length(), proto.nullable());
+  } else {
+    return GetType(type_id, proto.nullable());
   }
 }
 

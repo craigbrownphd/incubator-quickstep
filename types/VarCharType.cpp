@@ -60,19 +60,6 @@ const VarCharType& VarCharType::InstanceNullable(const std::size_t length) {
   return InstanceInternal<true>(length);
 }
 
-const VarCharType& VarCharType::InstanceFromProto(const serialization::Type &proto) {
-  return Instance(proto.GetExtension(serialization::VarCharType::length), proto.nullable());
-}
-
-serialization::Type VarCharType::getProto() const {
-  serialization::Type proto;
-  proto.mutable_type_id()->CopyFrom(TypeIDFactory::GetProto(type_id_));
-  proto.set_nullable(nullable_);
-
-  proto.SetExtension(serialization::VarCharType::length, length_);
-  return proto;
-}
-
 size_t VarCharType::estimateAverageByteLength() const {
   if (length_ > 160) {
     return 80;

@@ -40,7 +40,7 @@ class Type;
 /**
  * @brief A type representing a single-precision floating-point number.
  **/
-class FloatType : public NumericSuperType<kFloat, float> {
+class FloatType : public NumericSuperType<FloatType, kFloat, float> {
  public:
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
@@ -75,14 +75,6 @@ class FloatType : public NumericSuperType<kFloat, float> {
     } else {
       return InstanceNonNullable();
     }
-  }
-
-  const Type& getNullableVersion() const override {
-    return InstanceNullable();
-  }
-
-  const Type& getNonNullableVersion() const override {
-    return InstanceNonNullable();
   }
 
   bool isSafelyCoercibleFrom(const Type &original_type) const override;
@@ -120,7 +112,7 @@ class FloatType : public NumericSuperType<kFloat, float> {
               // never takes more than 2 base-10 digits to represent.
 
   explicit FloatType(const bool nullable)
-      : NumericSuperType<kFloat, float>(nullable) {
+      : NumericSuperType<FloatType, kFloat, float>(nullable) {
   }
 
   DISALLOW_COPY_AND_ASSIGN(FloatType);

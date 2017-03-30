@@ -40,7 +40,7 @@ class Type;
 /**
  * @brief A type representing a double-precision floating-point number.
  **/
-class DoubleType : public NumericSuperType<kDouble, double> {
+class DoubleType : public NumericSuperType<DoubleType, kDouble, double> {
  public:
   /**
    * @brief Get a reference to the non-nullable singleton instance of this
@@ -75,14 +75,6 @@ class DoubleType : public NumericSuperType<kDouble, double> {
     } else {
       return InstanceNonNullable();
     }
-  }
-
-  const Type& getNullableVersion() const override {
-    return InstanceNullable();
-  }
-
-  const Type& getNonNullableVersion() const override {
-    return InstanceNonNullable();
   }
 
   bool isSafelyCoercibleFrom(const Type &original_type) const override;
@@ -120,7 +112,7 @@ class DoubleType : public NumericSuperType<kDouble, double> {
               // exponent never takes more than 3 base-10 digits to represent.
 
   explicit DoubleType(const bool nullable)
-      : NumericSuperType<kDouble, double>(nullable) {
+      : NumericSuperType<DoubleType, kDouble, double>(nullable) {
   }
 
   DISALLOW_COPY_AND_ASSIGN(DoubleType);
