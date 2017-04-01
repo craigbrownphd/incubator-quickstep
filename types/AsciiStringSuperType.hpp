@@ -35,7 +35,9 @@ namespace quickstep {
  * @brief A superclass for ASCII string types.
  **/
 template <typename TypeClass, TypeID type_id, TypeStorageLayout layout>
-class AsciiStringSuperType : public TypeSynthesizer<TypeClass, type_id, true, layout> {
+class AsciiStringSuperType
+    : public TypeSynthesizer<TypeClass, type_id,
+                             true, layout, void, Type::kAsciiString> {
  public:
   bool isCoercibleFrom(const Type &original_type) const override {
     if (original_type.isNullable() && !this->nullable_) {
@@ -59,7 +61,7 @@ class AsciiStringSuperType : public TypeSynthesizer<TypeClass, type_id, true, la
                        const std::size_t minimum_byte_length,
                        const std::size_t maximum_byte_length,
                        const std::size_t string_length)
-      : TypeSynthesizer<TypeClass, type_id, true, layout>(
+      : TypeSynthesizer<TypeClass, type_id, true, layout, void, Type::kAsciiString>(
             Type::kAsciiString, type_id, nullable, minimum_byte_length, maximum_byte_length),
         length_(string_length) {
   }

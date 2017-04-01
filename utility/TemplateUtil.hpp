@@ -58,6 +58,19 @@ struct MakeSequence<0, S...> {
   typedef Sequence<S...> type;
 };
 
+
+template <typename T, typename EnableT = void>
+struct IsTypeTrait {
+  static constexpr bool value = false;
+};
+
+template <typename T>
+struct IsTypeTrait<T, std::enable_if_t<
+    std::is_same<typename T::type, typename T::type>::value>> {
+  static constexpr bool value = true;
+};
+
+
 template<class...> struct Disjunction : std::false_type {};
 template<class B1> struct Disjunction<B1> : B1 {};
 template<class B1, class... Bn>
@@ -70,19 +83,22 @@ struct EqualsAny {
       Disjunction<std::is_same<check, cases>...>::value;
 };
 
-namespace template_util_inner {
+template <char ...c>
+struct StringLiteral {
+  inline static std::string ToString() {
+    return std::string({c...});
+  }
+};
 
-/**
- * @brief Final step of CreateBoolInstantiatedInstance. Now all bool_values are
- *        ready. Instantiate the template and create (i.e. new) an instance.
- */
-template <template <bool ...> class T, class ReturnT,
-          bool ...bool_values, std::size_t ...i,
-          typename Tuple>
-inline ReturnT* CreateBoolInstantiatedInstanceInner(Tuple &&args,
-                                                    Sequence<i...> &&indices) {
-  return new T<bool_values...>(std::get<i>(std::forward<Tuple>(args))...);
-}
+template <typename LeftT, typename RightT>
+struct PairSelectorLeft {
+  typedef LeftT type;
+};
+
+template <typename LeftT, typename RightT>
+struct PairSelectorRight {
+  typedef RightT type;
+};
 
 /**
  * @brief Invoke the functor with the compile-time bool values wrapped as
@@ -118,98 +134,82 @@ inline auto InvokeOnBoolsInner(TupleT &&args, Sequence<i...> &&indices) {
                             std::get<i>(std::forward<TupleT>(args))...);
 }
 
-}  // namespace template_util_inner
+template <typename Out, typename Rest,
+          template <typename> class Op, typename EnableT = void>
+struct MapInner;
 
-/**
- * @brief Edge case of the recursive CreateBoolInstantiatedInstance function
- *        when all bool variables have been branched and replaced with compile-time
- *        bool constants.
- */
-template <template <bool ...> class T, class ReturnT,
-          bool ...bool_values,
-          typename Tuple>
-inline ReturnT* CreateBoolInstantiatedInstance(Tuple &&args) {
-  // Note that the constructor arguments have been forwarded as a tuple (args).
-  // Here we generate a compile-time index sequence (i.e. typename MakeSequence<n_args>::type())
-  // for the tuple, so that the tuple can be unpacked as a sequence of constructor
-  // parameters in CreateBoolInstantiatedInstanceInner.
-  constexpr std::size_t n_args = std::tuple_size<Tuple>::value;
-  return template_util_inner::CreateBoolInstantiatedInstanceInner<
-      T, ReturnT, bool_values...>(
-          std::forward<Tuple>(args),
-          typename MakeSequence<n_args>::type());
-}
+template <typename Out, typename Rest,
+          template <typename> class Op, typename EnableT = void>
+struct FlatMapInner;
 
-/**
- * @brief A helper function for creating bool branched templates.
- *
- * The scenario for using this helper function is that, suppose we have a class
- * where all template parameters are bools:
- * --
- * template <bool c1, bool c2, bool c3>
- * class SomeClass : public BaseClass {
- *   // This simple function will be invoked in computationally-intensive loops.
- *   inline SomeType someSimpleFunction(...) {
- *     if (c1) {
- *       doSomeThing1();
- *     }
- *     if (c2) {
- *       doSomeThing2();
- *     }
- *     if (c3) {
- *       doSomeThing3();
- *     }
- *   }
- * };
- * --
- * Typically, this bool-paramterized template is for performance consideration.
- * That is, we would like to make a copy of code for each configuration of bool
- * values, so that there will be no branchings in someSimpleFunction().
- *
- * The problem is that, to conditionally instantiate the template, given bool
- * variables c1, c2, c3, we have to do something like this:
- * --
- * if (c1) {
- *   if (c2) {
- *     if (c3) {
- *       return new SomeClass<true, true, true>(some_args...);
- *     } else {
- *       return new SomeClass<true, true, false>(some_args...);
- *     }
- *   } else {
- *     if (c3) {
- *       return new SomeClass<true, false, true>(some_args...);
- *     } else {
- *       return new SomeClass<true, false, false>(some_args...);
- *     }
- * } else {
- *   ...
- * }
- * --
- * Then there will be power(2,N) branches if the template has N bool parameters,
- * making it tedious to do the instantiating.
- *
- * Now, this helper function can achieve the branched instantiation in one
- * statement as:
- * --
- * return CreateBoolInstantiatedInstance<SomeClass,BaseClass>(
- *     std::forward_as_tuple(some_args...), c1, c2, c3);
- * --
- */
-template <template <bool ...> class T, class ReturnT,
-          bool ...bool_values, typename ...Bools,
-          typename Tuple>
-inline ReturnT* CreateBoolInstantiatedInstance(Tuple &&args,
-                                               const bool tparam,
-                                               const Bools ...rest_tparams) {
-  if (tparam) {
-    return CreateBoolInstantiatedInstance<T, ReturnT, bool_values..., true>(
-        std::forward<Tuple>(args), rest_tparams...);
-  } else {
-    return CreateBoolInstantiatedInstance<T, ReturnT, bool_values..., false>(
-        std::forward<Tuple>(args), rest_tparams...);
-  }
-}
+template <typename Out, typename Rest,
+          template <typename> class Op, typename EnableT = void>
+struct FilterInner;
+
+template <typename Out, typename Rest,
+          template <typename> class Op, typename EnableT = void>
+struct FilterMapInner;
+
+template <typename Out, typename Rest, typename EnableT = void>
+struct UniqueInner;
+
+template <typename Out, typename Rest, typename ...DumbT>
+struct UniqueInnerHelper {
+  using type = typename UniqueInner<Out, Rest>::type;
+  static constexpr bool kDumbSize = sizeof...(DumbT);
+};
+
+template <typename Out, typename Rest,
+          typename Subtrahend, typename EnableT = void>
+struct SubtractInner;
+
+template <typename ...Ts>
+class TypeList;
+
+template <typename ...Ts>
+class TypeListCommon {
+ private:
+  template <typename ...Tail>
+  struct AppendInner {
+    using type = TypeList<Ts..., Tail...>;
+  };
+
+ public:
+  static constexpr std::size_t length = sizeof...(Ts);
+
+  template <template <typename ...> class Target>
+  using bind = Target<Ts...>;
+
+  template <typename T>
+  using push_front = TypeList<T, Ts...>;
+
+  template <typename T>
+  using push_back = TypeList<Ts..., T>;
+
+  template <typename T>
+  using contains = EqualsAny<T, Ts...>;
+
+  template <typename TL>
+  using append = typename TL::template bind<AppendInner>::type;
+
+  template <template <typename> class Op>
+  using map = typename MapInner<TypeList<>, TypeList<Ts...>, Op>::type;
+
+  template <template <typename> class Op>
+  using flatmap = typename FlatMapInner<TypeList<>, TypeList<Ts...>, Op>::type;
+
+  template <template <typename> class Op>
+  using filter = typename FilterInner<TypeList<>, TypeList<Ts...>, Op>::type;
+
+  template <template <typename> class Op>
+  using filtermap = typename FilterMapInner<TypeList<>, TypeList<Ts...>, Op>::type;
+
+  template <typename ...DumbT>
+  using unique = typename UniqueInnerHelper<TypeList<>, TypeList<Ts...>, DumbT...>::type;
+
+  template <typename Subtrahend>
+  using subtract = typename SubtractInner<TypeList<>, TypeList<Ts...>, Subtrahend>::type;
+};
 
 /**
  * @brief A helper function for bool branched template specialization.
@@ -235,29 +235,178 @@ inline ReturnT* CreateBoolInstantiatedInstance(Tuple &&args,
 template <typename ...ArgTypes>
 inline auto InvokeOnBools(ArgTypes ...args) {
   constexpr std::size_t last = sizeof...(args) - 1;
-  return template_util_inner::InvokeOnBoolsInner<last>(
+  return InvokeOnBoolsInner<last>(
       std::forward_as_tuple(args...),
       typename MakeSequence<last>::type());
 }
 
+template <typename ...Ts>
+class TypeList : public TypeListCommon<Ts...> {
+ private:
+  template <typename Head, typename ...Tail>
+  struct HeadTailInner {
+    using head = Head;
+    using tail = TypeList<Tail...>;
+  };
 
-template <char ...c>
-struct StringLiteral {
-  inline static std::string ToString() {
-    return std::string({c...});
-  }
+ public:
+  using head = typename HeadTailInner<Ts...>::head;
+  using tail = typename HeadTailInner<Ts...>::tail;
 };
 
-template <typename LeftT, typename RightT>
-struct PairSelectorLeft {
-  typedef LeftT type;
+template <>
+class TypeList<> : public TypeListCommon<> {
 };
 
-template <typename LeftT, typename RightT>
-struct PairSelectorRight {
-  typedef RightT type;
+
+template <typename Out, typename Rest, template <typename> class Op>
+struct MapInner<Out, Rest, Op,
+                std::enable_if_t<Rest::length == 0>> {
+  using type = Out;
 };
 
+template <typename Out, typename Rest, template <typename> class Op>
+struct MapInner<Out, Rest, Op,
+                std::enable_if_t<Rest::length != 0>>
+    : MapInner<typename Out::template push_back<typename Op<typename Rest::head>::type>,
+               typename Rest::tail, Op> {};
+
+template <typename Out, typename Rest, template <typename> class Op>
+struct FlatMapInner<Out, Rest, Op,
+                    std::enable_if_t<Rest::length == 0>> {
+  using type = Out;
+};
+
+template <typename Out, typename Rest, template <typename> class Op>
+struct FlatMapInner<Out, Rest, Op,
+                    std::enable_if_t<Rest::length != 0>>
+    : FlatMapInner<typename Out::template append<typename Op<typename Rest::head>::type>,
+                   typename Rest::tail, Op> {};
+
+template <typename Out, typename Rest, template <typename> class Op>
+struct FilterInner<Out, Rest, Op,
+                   std::enable_if_t<Rest::length == 0>> {
+  using type = Out;
+};
+
+template <typename Out, typename Rest, template <typename> class Op>
+struct FilterInner<Out, Rest, Op,
+                   std::enable_if_t<Op<typename Rest::head>::value>>
+    : FilterInner<typename Out::template push_back<typename Rest::head>,
+                  typename Rest::tail, Op> {};
+
+template <typename Out, typename Rest, template <typename> class Op>
+struct FilterInner<Out, Rest, Op,
+                   std::enable_if_t<!Op<typename Rest::head>::value>>
+    : FilterInner<Out, typename Rest::tail, Op> {};
+
+template <typename Out, typename Rest, template <typename> class Op>
+struct FilterMapInner<Out, Rest, Op,
+                      std::enable_if_t<Rest::length == 0>> {
+  using type = Out;
+};
+
+template <typename Out, typename Rest, template <typename> class Op>
+struct FilterMapInner<Out, Rest, Op,
+                      std::enable_if_t<Rest::length != 0 &&
+                                       IsTypeTrait<Op<typename Rest::head>>::value>>
+    : FilterMapInner<typename Out::template push_back<typename Op<typename Rest::head>::type>,
+                     typename Rest::tail, Op> {};
+
+template <typename Out, typename Rest, template <typename> class Op>
+struct FilterMapInner<Out, Rest, Op,
+                      std::enable_if_t<Rest::length != 0 &&
+                                       !IsTypeTrait<Op<typename Rest::head>>::value>>
+    : FilterMapInner<Out, typename Rest::tail, Op> {};
+
+template <typename Out, typename Rest>
+struct UniqueInner<Out, Rest,
+                   std::enable_if_t<Rest::length == 0>> {
+  using type = Out;
+};
+
+template <typename Out, typename Rest>
+struct UniqueInner<Out, Rest,
+                   std::enable_if_t<Out::template contains<typename Rest::head>::value>>
+    : UniqueInner<Out, typename Rest::tail> {};
+
+template <typename Out, typename Rest>
+struct UniqueInner<Out, Rest,
+                   std::enable_if_t<!Out::template contains<typename Rest::head>::value>>
+    : UniqueInner<typename Out::template push_back<typename Rest::head>,
+                  typename Rest::tail> {};
+
+template <typename Out, typename Rest, typename Subtrahend>
+struct SubtractInner<Out, Rest, Subtrahend,
+                     std::enable_if_t<Rest::length == 0>> {
+  using type = Out;
+};
+
+template <typename Out, typename Rest, typename Subtrahend>
+struct SubtractInner<Out, Rest, Subtrahend,
+                     std::enable_if_t<Subtrahend::template contains<
+                         typename Rest::head>::value>>
+    : SubtractInner<Out, typename Rest::tail, Subtrahend> {};
+
+template <typename Out, typename Rest, typename Subtrahend>
+struct SubtractInner<Out, Rest, Subtrahend,
+                     std::enable_if_t<!Subtrahend::template contains<
+                         typename Rest::head>::value>>
+    : SubtractInner<typename Out::template push_back<typename Rest::head>,
+                    typename Rest::tail, Subtrahend> {};
+
+template <typename LeftEdge, typename RightEdge, typename EnableT = void>
+struct EdgeMatcher {};
+
+template <typename LeftEdge, typename RightEdge>
+struct EdgeMatcher<LeftEdge, RightEdge,
+                   std::enable_if_t<std::is_same<typename LeftEdge::tail::head,
+                                                 typename RightEdge::head>::value>> {
+  using type = TypeList<typename LeftEdge::head, typename RightEdge::tail::head>;
+};
+
+template <typename LeftEdges, typename RightEdges>
+struct JoinPath {
+  template <typename LeftEdge>
+  struct JoinPathLeftHelper {
+    template <typename RightEdge>
+    struct JoinPathRightHelper : EdgeMatcher<LeftEdge, RightEdge> {};
+
+    using type = typename RightEdges::template filtermap<JoinPathRightHelper>;
+  };
+  using type = typename LeftEdges::template flatmap<JoinPathLeftHelper>;
+};
+
+// Semi-naive
+template <typename Out, typename WorkSet, typename Edges, typename EnableT = void>
+struct TransitiveClosureInner;
+
+template <typename Out, typename WorkSet, typename Edges>
+struct TransitiveClosureInner<Out, WorkSet, Edges,
+                              std::enable_if_t<WorkSet::length == 0>> {
+  using type = Out;
+};
+
+template <typename Out, typename WorkSet, typename Edges>
+struct TransitiveClosureInner<Out, WorkSet, Edges,
+                              std::enable_if_t<WorkSet::length != 0>>
+    : TransitiveClosureInner<typename Out::template append<WorkSet>,
+                             typename JoinPath<WorkSet, Edges>::type::template subtract<
+                                 typename Out::template append<WorkSet>>::template unique<>,
+                             Edges> {};
+
+template <typename Edge>
+struct TransitiveClosureInitializer {
+  using type = TypeList<TypeList<typename Edge::head, typename Edge::head>,
+                        TypeList<typename Edge::tail::head, typename Edge::tail::head>>;
+};
+
+template <typename Edges>
+using TransitiveClosure =
+    typename TransitiveClosureInner<
+        TypeList<>,
+        typename Edges::template flatmap<TransitiveClosureInitializer>::template unique<>,
+        Edges>::type;
 
 /** @} */
 

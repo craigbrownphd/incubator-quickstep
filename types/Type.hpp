@@ -30,6 +30,7 @@
 #include "types/TypeID.hpp"
 #include "types/TypedValue.hpp"
 #include "utility/Macros.hpp"
+#include "utility/PtrMap.hpp"
 
 #include "glog/logging.h"
 
@@ -219,7 +220,7 @@ class Type {
    * @return An estimate of the average number of bytes used by data items of
    *         this type.
    **/
-  virtual std::size_t estimateAverageByteLength() const = 0;
+  virtual std::size_t estimateAverageByteLength() const;
 
   /**
    * @brief Determine whether this Type is exactly the same as another.
@@ -466,11 +467,76 @@ class Type {
   DISALLOW_COPY_AND_ASSIGN(Type);
 };
 
+
+template <typename TypeClass, bool parameterized>
+class TypeInstance;
+
+template <typename TypeClass>
+class TypeInstance<TypeClass, false> {
+ public:
+  static const TypeClass& InstanceNonNullable() {
+    return InstanceInternal<false>();
+  }
+
+  static const TypeClass& InstanceNullable() {
+    return InstanceInternal<true>();
+  }
+
+  static const TypeClass& Instance(const bool nullable) {
+    if (nullable) {
+      return InstanceNullable();
+    } else {
+      return InstanceNonNullable();
+    }
+  }
+
+ private:
+  template <bool nullable>
+  inline static const TypeClass& InstanceInternal() {
+    static TypeClass instance(nullable);
+    return instance;
+  }
+};
+
+template <typename TypeClass>
+class TypeInstance<TypeClass, true> {
+ public:
+  static const TypeClass& InstanceNonNullable(const std::size_t length) {
+    return InstanceInternal<false>(length);
+  }
+
+  static const TypeClass& InstanceNullable(const std::size_t length) {
+    return InstanceInternal<true>(length);
+  }
+
+  static const TypeClass& Instance(const std::size_t length, const bool nullable) {
+    if (nullable) {
+      return InstanceNullable(length);
+    } else {
+      return InstanceNonNullable(length);
+    }
+  }
+
+ private:
+  template <bool nullable>
+  inline static const TypeClass& InstanceInternal(const std::size_t length) {
+    static PtrMap<size_t, TypeClass> instance_map;
+    auto imit = instance_map.find(length);
+    if (imit == instance_map.end()) {
+      imit = instance_map.insert(length, new TypeClass(length, nullable)).first;
+    }
+    return *(imit->second);
+  }
+};
+
+
 template <typename TypeClass, TypeID type_id,
           bool parameterized, TypeStorageLayout layout,
-          typename CppType = void>
-class TypeSynthesizer : public Type {
+          typename CppType = void,
+          Type::SuperTypeID super_type_id = Type::kOther>
+class TypeSynthesizer : public Type, public TypeInstance<TypeClass, parameterized> {
  public:
+  static constexpr Type::SuperTypeID kStaticSuperTypeID = super_type_id;
   static constexpr TypeID kStaticTypeID = type_id;
   static constexpr bool kParameterized = parameterized;
   static constexpr TypeStorageLayout kLayout = layout;
@@ -507,32 +573,43 @@ class TypeSynthesizer : public Type {
   template <bool has_param>
   inline const Type& getInstance(const bool nullable,
                                  std::enable_if_t<has_param>* = 0) const {
-    return TypeClass::Instance(parameter_, nullable);
+    return TypeInstance<TypeClass, kParameterized>::Instance(parameter_, nullable);
   }
 
   template <bool has_param>
   inline const Type& getInstance(const bool nullable,
                                  std::enable_if_t<!has_param>* = 0) const {
-    return TypeClass::Instance(nullable);
+    return TypeInstance<TypeClass, kParameterized>::Instance(nullable);
   }
+
+  friend class TypeInstance<TypeClass, kParameterized>;
 
   DISALLOW_COPY_AND_ASSIGN(TypeSynthesizer);
 };
 
 template <typename TypeClass, TypeID type_id,
-          bool parameterized, TypeStorageLayout layout, typename CppType>
+          bool parameterized, TypeStorageLayout layout,
+          typename CppType, Type::SuperTypeID super_type_id>
+constexpr Type::SuperTypeID TypeSynthesizer<
+    TypeClass, type_id, parameterized, layout, CppType, super_type_id>::kStaticSuperTypeID;
+
+template <typename TypeClass, TypeID type_id,
+          bool parameterized, TypeStorageLayout layout,
+          typename CppType, Type::SuperTypeID super_type_id>
 constexpr TypeID TypeSynthesizer<
-    TypeClass, type_id, parameterized, layout, CppType>::kStaticTypeID;
+    TypeClass, type_id, parameterized, layout, CppType, super_type_id>::kStaticTypeID;
 
 template <typename TypeClass, TypeID type_id,
-          bool parameterized, TypeStorageLayout layout, typename CppType>
+          bool parameterized, TypeStorageLayout layout,
+          typename CppType, Type::SuperTypeID super_type_id>
 constexpr bool TypeSynthesizer<
-    TypeClass, type_id, parameterized, layout, CppType>::kParameterized;
+    TypeClass, type_id, parameterized, layout, CppType, super_type_id>::kParameterized;
 
 template <typename TypeClass, TypeID type_id,
-          bool parameterized, TypeStorageLayout layout, typename CppType>
+          bool parameterized, TypeStorageLayout layout,
+          typename CppType, Type::SuperTypeID super_type_id>
 constexpr TypeStorageLayout TypeSynthesizer<
-    TypeClass, type_id, parameterized, layout, CppType>::kLayout;
+    TypeClass, type_id, parameterized, layout, CppType, super_type_id>::kLayout;
 
 /** @} */
 

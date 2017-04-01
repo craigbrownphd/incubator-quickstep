@@ -17,17 +17,43 @@
  * under the License.
  **/
 
-#ifndef QUICKSTEP_TYPES_TYPE_CONCEPT_HPP_
-#define QUICKSTEP_TYPES_TYPE_CONCEPT_HPP_
+#ifndef QUICKSTEP_TYPES_NUMERIC_TYPE_SAFE_COERCIBILITY_HPP_
+#define QUICKSTEP_TYPES_NUMERIC_TYPE_SAFE_COERCIBILITY_HPP_
+
+#include "utility/TemplateUtil.hpp"
 
 namespace quickstep {
+
+class BoolType;
+class DoubleType;
+class FloatType;
+class IntType;
+class LongType;
 
 /** \addtogroup Types
  *  @{
  */
 
+using NumericTypeSafeCoersions = TypeList<
+    TypeList<BoolType, IntType>,
+    TypeList<IntType, FloatType>,
+    TypeList<IntType, LongType>,
+    TypeList<FloatType, DoubleType>,
+    TypeList<LongType, DoubleType>
+>;
+
+using NumericTypeSafeCoersionClosure = TransitiveClosure<NumericTypeSafeCoersions>;
+
+
+template <typename LeftType, typename RightType>
+struct NumericTypeSafeCoercibility {
+  static constexpr bool value =
+      NumericTypeSafeCoersionClosure::contains<
+          TypeList<LeftType, RightType>>::value;
+};
+
 /** @} */
 
 }  // namespace quickstep
 
-#endif  // QUICKSTEP_TYPES_TYPE_CONCEPT_HPP_
+#endif  // QUICKSTEP_TYPES_NUMERIC_TYPE_SAFE_COERCIBILITY_HPP_

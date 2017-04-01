@@ -42,24 +42,6 @@ using std::string;
 
 namespace quickstep {
 
-template <bool nullable_internal>
-const CharType& CharType::InstanceInternal(const std::size_t length) {
-  static PtrMap<size_t, CharType> instance_map;
-  PtrMap<size_t, CharType>::iterator imit = instance_map.find(length);
-  if (imit == instance_map.end()) {
-    imit = instance_map.insert(length, new CharType(length, nullable_internal)).first;
-  }
-  return *(imit->second);
-}
-
-const CharType& CharType::InstanceNonNullable(const std::size_t length) {
-  return InstanceInternal<false>(length);
-}
-
-const CharType& CharType::InstanceNullable(const std::size_t length) {
-  return InstanceInternal<true>(length);
-}
-
 bool CharType::isSafelyCoercibleFrom(const Type &original_type) const {
   QUICKSTEP_NULL_COERCIBILITY_CHECK();
 

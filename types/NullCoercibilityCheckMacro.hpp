@@ -20,9 +20,6 @@
 #ifndef QUICKSTEP_TYPES_NULL_COERCIBILITY_CHECK_MACRO_HPP_
 #define QUICKSTEP_TYPES_NULL_COERCIBILITY_CHECK_MACRO_HPP_
 
-#include "types/Type.hpp"
-#include "types/TypeID.hpp"
-
 /** \addtogroup Types
  *  @{
  */

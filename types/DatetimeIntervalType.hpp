@@ -44,45 +44,6 @@ class DatetimeIntervalType :
     public TypeSynthesizer<DatetimeIntervalType, kDatetimeInterval,
                            false, kNativeEmbedded, DatetimeIntervalLit> {
  public:
-  /**
-   * @brief Get a reference to the non-nullable singleton instance of this
-   *        Type.
-   *
-   * @return A reference to the non-nullable singleton instance of this Type.
-   **/
-  static const DatetimeIntervalType& InstanceNonNullable() {
-    static DatetimeIntervalType instance(false);
-    return instance;
-  }
-
-  /**
-   * @brief Get a reference to the nullable singleton instance of this Type.
-   *
-   * @return A reference to the nullable singleton instance of this Type.
-   **/
-  static const DatetimeIntervalType& InstanceNullable() {
-    static DatetimeIntervalType instance(true);
-    return instance;
-  }
-
-  /**
-   * @brief Get a reference to a singleton instance of this Type.
-   *
-   * @param nullable Whether to get the nullable version of this Type.
-   * @return A reference to the desired singleton instance of this Type.
-   **/
-  static const DatetimeIntervalType& Instance(const bool nullable) {
-    if (nullable) {
-      return InstanceNullable();
-    } else {
-      return InstanceNonNullable();
-    }
-  }
-
-  std::size_t estimateAverageByteLength() const override {
-    return sizeof(DatetimeIntervalLit);
-  }
-
   int getPrintWidth() const override {
     return DatetimeIntervalLit::kPrintingChars;
   }
@@ -103,6 +64,8 @@ class DatetimeIntervalType :
              Type::kOther, kStaticTypeID, nullable,
              sizeof(DatetimeIntervalLit), sizeof(DatetimeIntervalLit)) {
   }
+
+  template <typename, bool> friend class TypeInstance;
 
   DISALLOW_COPY_AND_ASSIGN(DatetimeIntervalType);
 };

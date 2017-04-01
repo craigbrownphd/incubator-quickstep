@@ -50,16 +50,9 @@ class TypedValue;
  **/
 class NullType : public TypeSynthesizer<NullType, kNullType, false, kNativeEmbedded> {
  public:
-  /**
-   * @brief Get a reference to the nullable singleton instance of this Type.
-   * @note Unlike other Types, there is no corresponding method to get a
-   *       non-nullable version of NullType. NullType is ALWAYS nullable.
-   *
-   * @return A reference to the nullable singleton instance of this Type.
-   **/
-  static const NullType& InstanceNullable() {
-    static NullType instance;
-    return instance;
+  static const NullType& InstanceNonNullable() {
+    LOG(FATAL) << "Called NullType::InstanceNonNullable(), "
+               << "which is not allowed.";
   }
 
   static const NullType& Instance(const bool nullable) {
@@ -69,18 +62,6 @@ class NullType : public TypeSynthesizer<NullType, kNullType, false, kNativeEmbed
       LOG(FATAL) << "Called NullType::Instance(nullable = true), "
                  << "which is not allowed.";
     }
-  }
-
-  std::size_t estimateAverageByteLength() const override {
-    return 0;
-  }
-
-  bool isCoercibleFrom(const Type &original_type) const override {
-    return original_type.getTypeID() == kNullType;
-  }
-
-  bool isSafelyCoercibleFrom(const Type &original_type) const override {
-    return original_type.getTypeID() == kNullType;
   }
 
   int getPrintWidth() const override {
@@ -105,10 +86,13 @@ class NullType : public TypeSynthesizer<NullType, kNullType, false, kNativeEmbed
  private:
   // NOTE(chasseur): NullType requires 0 bytes of inherent storage. It does,
   // however, require a bit in NULL bitmaps.
-  NullType()
+  NullType(const bool nullable)
       : TypeSynthesizer<NullType, kNullType, false, kNativeEmbedded>(
             Type::kOther, kStaticTypeID, true, 0, 0) {
+    DCHECK(nullable);
   }
+
+  template <typename, bool> friend class TypeInstance;
 
   DISALLOW_COPY_AND_ASSIGN(NullType);
 };

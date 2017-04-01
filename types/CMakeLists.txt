@@ -33,6 +33,7 @@ QS_PROTOBUF_GENERATE_CPP(types_Type_proto_srcs types_Type_proto_hdrs Type.proto)
 
 # Declare micro-libs:
 add_library(quickstep_types_AsciiStringSuperType ../empty_src.cpp AsciiStringSuperType.hpp)
+add_library(quickstep_types_BoolType BoolType.cpp BoolType.hpp)
 add_library(quickstep_types_CharType CharType.cpp CharType.hpp)
 add_library(quickstep_types_DateOperatorOverloads ../empty_src.cpp DateOperatorOverloads.hpp)
 add_library(quickstep_types_DateType DateType.cpp DateType.hpp)
@@ -48,11 +49,14 @@ add_library(quickstep_types_LongType LongType.cpp LongType.hpp)
 add_library(quickstep_types_NullCoercibilityCheckMacro ../empty_src.cpp NullCoercibilityCheckMacro.hpp)
 add_library(quickstep_types_NullType ../empty_src.cpp NullType.hpp)
 add_library(quickstep_types_NumericSuperType ../empty_src.cpp NumericSuperType.hpp)
+add_library(quickstep_types_NumericTypeSafeCoercibility ../empty_src.cpp NumericTypeSafeCoercibility.hpp)
 add_library(quickstep_types_NumericTypeUnifier ../empty_src.cpp NumericTypeUnifier.hpp)
 add_library(quickstep_types_Type Type.cpp Type.hpp)
 add_library(quickstep_types_TypeErrors ../empty_src.cpp TypeErrors.hpp)
 add_library(quickstep_types_TypeFactory TypeFactory.cpp TypeFactory.hpp)
 add_library(quickstep_types_TypeID TypeID.cpp TypeID.hpp)
+add_library(quickstep_types_TypeIDSelectors ../empty_src.cpp TypeIDSelectors.hpp)
+add_library(quickstep_types_TypeRegistrar ../empty_src.cpp TypeRegistrar.hpp)
 add_library(quickstep_types_TypeUtil ../empty_src.cpp TypeUtil.hpp)
 add_library(quickstep_types_Type_proto ${types_Type_proto_srcs})
 add_library(quickstep_types_TypedValue TypedValue.cpp TypedValue.hpp)
@@ -64,8 +68,15 @@ add_library(quickstep_types_YearMonthIntervalType YearMonthIntervalType.cpp Year
 target_link_libraries(quickstep_types_AsciiStringSuperType
                       quickstep_types_Type
                       quickstep_types_TypeID)
+target_link_libraries(quickstep_types_BoolType
+                      glog
+                      quickstep_types_Type
+                      quickstep_types_TypeID
+                      quickstep_types_TypedValue
+                      quickstep_utility_Macros)
 target_link_libraries(quickstep_types_CharType
                       glog
+                      quickstep_types_AsciiStringSuperType
                       quickstep_types_NullCoercibilityCheckMacro
                       quickstep_types_Type
                       quickstep_types_TypeID
@@ -158,12 +169,17 @@ target_link_libraries(quickstep_types_NumericSuperType
                       quickstep_types_TypeID
                       quickstep_types_TypedValue
                       quickstep_utility_Macros)
+target_link_libraries(quickstep_types_NumericTypeSafeCoercibility
+                      quickstep_utility_TemplateUtil)
+target_link_libraries(quickstep_types_NumericTypeUnifier
+                      quickstep_types_NumericTypeSafeCoercibility)
 target_link_libraries(quickstep_types_Type
                       glog
                       quickstep_types_Type_proto
                       quickstep_types_TypeID
                       quickstep_types_TypedValue
-                      quickstep_utility_Macros)
+                      quickstep_utility_Macros
+                      quickstep_utility_PtrMap)
 target_link_libraries(quickstep_types_TypeFactory
                       glog
                       quickstep_types_CharType
@@ -177,6 +193,7 @@ target_link_libraries(quickstep_types_TypeFactory
                       quickstep_types_NullType
                       quickstep_types_Type
                       quickstep_types_TypeID
+                      quickstep_types_TypeUtil
                       quickstep_types_Type_proto
                       quickstep_types_VarCharType
                       quickstep_types_YearMonthIntervalType
@@ -184,6 +201,12 @@ target_link_libraries(quickstep_types_TypeFactory
 target_link_libraries(quickstep_types_TypeID
                       quickstep_types_Type_proto
                       quickstep_utility_Macros)
+target_link_libraries(quickstep_types_TypeIDSelectors
+                      quickstep_types_TypeID
+                      quickstep_utility_TemplateUtil)
+target_link_libraries(quickstep_types_TypeRegistrar
+                      quickstep_types_TypeID
+                      quickstep_types_TypeIDSelectors)
 target_link_libraries(quickstep_types_TypeUtil
                       quickstep_types_CharType
                       quickstep_types_DateType
@@ -196,11 +219,11 @@ target_link_libraries(quickstep_types_TypeUtil
                       quickstep_types_NullType
                       quickstep_types_Type
                       quickstep_types_TypeID
+                      quickstep_types_TypeRegistrar
                       quickstep_types_Type_proto
                       quickstep_types_VarCharType
                       quickstep_types_YearMonthIntervalType
-                      quickstep_utility_Macros
-                      quickstep_utility_TemplateUtil)
+                      quickstep_utility_Macros)
 target_link_libraries(quickstep_types_TypedValue
                       farmhash
                       glog
@@ -219,6 +242,7 @@ target_link_libraries(quickstep_types_Type_proto
                       ${PROTOBUF_LIBRARY})
 target_link_libraries(quickstep_types_VarCharType
                       glog
+                      quickstep_types_AsciiStringSuperType
                       quickstep_types_NullCoercibilityCheckMacro
                       quickstep_types_Type
                       quickstep_types_TypeID
@@ -240,6 +264,7 @@ target_link_libraries(quickstep_types_YearMonthIntervalType
 add_library(quickstep_types ../empty_src.cpp TypesModule.hpp)
 target_link_libraries(quickstep_types
                       quickstep_types_AsciiStringSuperType
+                      quickstep_types_BoolType
                       quickstep_types_CharType
                       quickstep_types_DateOperatorOverloads
                       quickstep_types_DateType
@@ -255,6 +280,7 @@ target_link_libraries(quickstep_types
                       quickstep_types_NullCoercibilityCheckMacro
                       quickstep_types_NullType
                       quickstep_types_NumericSuperType
+                      quickstep_types_NumericTypeSafeCoercibility
                       quickstep_types_NumericTypeUnifier
                       quickstep_types_Type
                       quickstep_types_TypeUtil

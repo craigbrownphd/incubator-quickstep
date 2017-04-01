@@ -42,6 +42,17 @@ bool Type::isSafelyCoercibleFrom(const Type &original_type) const {
   return (original_type.getTypeID() == type_id_);
 }
 
+std::size_t Type::estimateAverageByteLength() const {
+  if (minimum_byte_length_ == maximum_byte_length_) {
+    return maximum_byte_length_;
+  }
+  if (maximum_byte_length_ > 160) {
+    return 80;
+  } else {
+    return (maximum_byte_length_ >> 1) + 1;
+  }
+}
+
 void Type::printValueToFile(const TypedValue &value,
                             FILE *file,
                             const int padding) const {

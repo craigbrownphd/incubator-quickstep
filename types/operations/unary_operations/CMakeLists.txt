@@ -112,12 +112,9 @@ target_link_libraries(quickstep_types_operations_unaryoperations_SubstringOperat
                       quickstep_types_VarCharType
                       quickstep_types_containers_ColumnVector
                       quickstep_types_containers_ColumnVectorUtil
-                      quickstep_types_operations_Operation_proto
                       quickstep_types_operations_unaryoperations_UnaryOperation
                       quickstep_types_port_strnlen
-                      quickstep_utility_HashPair
                       quickstep_utility_Macros
-                      quickstep_utility_StringUtil
                       quickstep_utility_TemplateUtil)
 target_link_libraries(quickstep_types_operations_unaryoperations_UnaryOperation
                       quickstep_catalog_CatalogTypedefs

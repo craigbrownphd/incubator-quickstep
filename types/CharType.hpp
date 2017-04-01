@@ -45,47 +45,6 @@ namespace quickstep {
  **/
 class CharType : public AsciiStringSuperType<CharType, kChar, kNonNativeInline> {
  public:
-  /**
-   * @brief Get a reference to the non-nullable singleton instance of this Type
-   *        for the specified length.
-   *
-   * @param length The length parameter of the CharType.
-   * @return A reference to the non-nullable singleton instance of this Type
-   *         for the specified length.
-   **/
-  static const CharType& InstanceNonNullable(const std::size_t length);
-
-  /**
-   * @brief Get a reference to the nullable singleton instance of this Type for
-   *        the specified length.
-   *
-   * @param length The length parameter of the CharType.
-   * @return A reference to the nullable singleton instance of this Type for
-   *         the specified length.
-   **/
-  static const CharType& InstanceNullable(const std::size_t length);
-
-  /**
-   * @brief Get a reference to the singleton instance of this Type for the
-   *        specified length and nullability.
-   *
-   * @param length The length parameter of the CharType.
-   * @param nullable Whether to get the nullable version of this Type.
-   * @return A reference to the singleton instance of this Type for the
-   *         specified length.
-   **/
-  static const CharType& Instance(const std::size_t length, const bool nullable) {
-    if (nullable) {
-      return InstanceNullable(length);
-    } else {
-      return InstanceNonNullable(length);
-    }
-  }
-
-  std::size_t estimateAverageByteLength() const override {
-    return length_;
-  }
-
   bool isSafelyCoercibleFrom(const Type &original_type) const override;
 
   std::string getName() const override;
@@ -112,8 +71,7 @@ class CharType : public AsciiStringSuperType<CharType, kChar, kNonNativeInline> 
             nullable, length, length, length) {
   }
 
-  template <bool nullable_internal>
-  static const CharType& InstanceInternal(const std::size_t length);
+  template <typename, bool> friend class TypeInstance;
 
   DISALLOW_COPY_AND_ASSIGN(CharType);
 };

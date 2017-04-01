@@ -42,41 +42,6 @@ class Type;
  **/
 class DoubleType : public NumericSuperType<DoubleType, kDouble, double> {
  public:
-  /**
-   * @brief Get a reference to the non-nullable singleton instance of this
-   *        Type.
-   *
-   * @return A reference to the non-nullable singleton instance of this Type.
-   **/
-  static const DoubleType& InstanceNonNullable() {
-    static DoubleType instance(false);
-    return instance;
-  }
-
-  /**
-   * @brief Get a reference to the nullable singleton instance of this Type.
-   *
-   * @return A reference to the nullable singleton instance of this Type.
-   **/
-  static const DoubleType& InstanceNullable() {
-    static DoubleType instance(true);
-    return instance;
-  }
-
-  /**
-   * @brief Get a reference to a singleton instance of this Type.
-   *
-   * @param nullable Whether to get the nullable version of this Type.
-   * @return A reference to the desired singleton instance of this Type.
-   **/
-  static const DoubleType& Instance(const bool nullable) {
-    if (nullable) {
-      return InstanceNullable();
-    } else {
-      return InstanceNonNullable();
-    }
-  }
-
   bool isSafelyCoercibleFrom(const Type &original_type) const override;
 
   int getPrintWidth() const override {
@@ -114,6 +79,8 @@ class DoubleType : public NumericSuperType<DoubleType, kDouble, double> {
   explicit DoubleType(const bool nullable)
       : NumericSuperType<DoubleType, kDouble, double>(nullable) {
   }
+
+  template <typename, bool> friend class TypeInstance;
 
   DISALLOW_COPY_AND_ASSIGN(DoubleType);
 };

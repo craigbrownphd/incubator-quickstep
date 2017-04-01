@@ -21,8 +21,10 @@
 #define QUICKSTEP_TYPES_NUMERIC_SUPER_TYPE_HPP_
 
 #include <cstddef>
+#include <unordered_set>
 
 #include "types/NullCoercibilityCheckMacro.hpp"
+#include "types/NumericTypeSafeCoercibility.hpp"
 #include "types/Type.hpp"
 #include "types/TypeID.hpp"
 #include "types/TypedValue.hpp"
@@ -40,10 +42,12 @@ namespace quickstep {
  **/
 template <typename TypeClass, TypeID type_id, typename CppType>
 class NumericSuperType
-    : public TypeSynthesizer<TypeClass, type_id, false, kNativeEmbedded, CppType> {
+    : public TypeSynthesizer<TypeClass, type_id,
+                             false, kNativeEmbedded, CppType, Type::kNumeric> {
  public:
-  std::size_t estimateAverageByteLength() const override {
-    return sizeof(CppType);
+  bool isSafelyCoercibleFrom(const Type &original_type) const override {
+    const auto it = safe_coerce_cache_.find(original_type.getTypeID());
+    return it != safe_coerce_cache_.end();
   }
 
   bool isCoercibleFrom(const Type &original_type) const override {
@@ -57,11 +61,13 @@ class NumericSuperType
 
  protected:
   explicit NumericSuperType(const bool nullable)
-      : TypeSynthesizer<TypeClass, type_id, false, kNativeEmbedded, CppType>(
-            Type::kNumeric, type_id, nullable, sizeof(CppType), sizeof(CppType)) {
-  }
+      : TypeSynthesizer<TypeClass, type_id,
+                        false, kNativeEmbedded, CppType, Type::kNumeric>(
+            Type::kNumeric, type_id, nullable, sizeof(CppType), sizeof(CppType)) {}
 
  private:
+  std::unordered_set<TypeID> safe_coerce_cache_;
+
   DISALLOW_COPY_AND_ASSIGN(NumericSuperType);
 };
 
