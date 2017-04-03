@@ -29,7 +29,7 @@
 #include "types/LongType.hpp"
 #include "types/operations/OperationUtil.hpp"
 #include "types/operations/binary_operations/BinaryOperationWrapper.hpp"
-#include "utility/TemplateUtil.hpp"
+#include "utility/meta/Common.hpp"
 
 namespace quickstep {
 
@@ -66,9 +66,9 @@ using CMathBinaryFunctor =
 using CMathBinaryFunctorPack = FunctorPack<
 // pow
     CMathBinaryFunctor<FloatType, FloatType, FloatType,
-                       std::pow, StringLiteral<'p','o','w'>>,
+                       std::pow, meta::StringLiteral<'p','o','w'>>,
     CMathBinaryFunctor<DoubleType, DoubleType, DoubleType,
-                       std::pow, StringLiteral<'p','o','w'>>
+                       std::pow, meta::StringLiteral<'p','o','w'>>
 >;
 
 /** @} */

@@ -38,7 +38,7 @@
 #include "types/operations/OperationUtil.hpp"
 #include "types/operations/binary_operations/BinaryOperation.hpp"
 #include "utility/Macros.hpp"
-#include "utility/TemplateUtil.hpp"
+#include "utility/meta/Common.hpp"
 
 namespace quickstep {
 
@@ -604,15 +604,15 @@ struct BinaryFunctorCrossProductPack {
 
   template <std::size_t ...Ls, std::size_t ...Rs>
   inline static std::vector<std::list<OperationPtr>> GenerateLeftHelper(
-      Sequence<Ls...> &&l_seq, Sequence<Rs...> &&r_seq) {
+      meta::IntegerSequence<Ls...> &&l_seq, meta::IntegerSequence<Rs...> &&r_seq) {
     return { GenerateRightHelper<Ls, Rs...>()... };
   }
 
   template <typename Dispatcher>
   inline static std::list<OperationPtr> GenerateOperations() {
     std::vector<std::list<OperationPtr>> op_list_groups =
-        GenerateLeftHelper(typename MakeSequence<std::tuple_size<LeftPack>::value>::type(),
-                           typename MakeSequence<std::tuple_size<RightPack>::value>::type());
+        GenerateLeftHelper(typename meta::MakeSequence<std::tuple_size<LeftPack>::value>::type(),
+                           typename meta::MakeSequence<std::tuple_size<RightPack>::value>::type());
 
     std::list<OperationPtr> operations;
     for (std::list<OperationPtr> &op_list : op_list_groups) {

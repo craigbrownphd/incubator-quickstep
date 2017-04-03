@@ -40,7 +40,7 @@ class Type;
 /**
  * @brief A type representing a single-precision floating-point number.
  **/
-class FloatType : public NumericSuperType<FloatType, kFloat, float> {
+class FloatType : public NumericSuperType<kFloat> {
  public:
   bool isSafelyCoercibleFrom(const Type &original_type) const override;
 
@@ -77,8 +77,7 @@ class FloatType : public NumericSuperType<FloatType, kFloat, float> {
               // never takes more than 2 base-10 digits to represent.
 
   explicit FloatType(const bool nullable)
-      : NumericSuperType<FloatType, kFloat, float>(nullable) {
-  }
+      : NumericSuperType<kFloat>(nullable) {}
 
   template <typename, bool> friend class TypeInstance;
 

@@ -38,7 +38,7 @@ add_library(quickstep_types_operations_binaryoperations_CMathBinaryOperations
 # Link dependencies:
 target_link_libraries(quickstep_types_operations_binaryoperations_ArithmeticBinaryFunctorOverloads
                       quickstep_types_DateOperatorOverloads
-                      quickstep_utility_TemplateUtil)
+                      quickstep_utility_meta_Common)
 target_link_libraries(quickstep_types_operations_binaryoperations_ArithmeticBinaryOperations
                       quickstep_types_DateType
                       quickstep_types_DatetimeIntervalType
@@ -53,8 +53,10 @@ target_link_libraries(quickstep_types_operations_binaryoperations_ArithmeticBina
                       quickstep_types_TypedValue
                       quickstep_types_YearMonthIntervalType
                       quickstep_types_operations_binaryoperations_ArithmeticBinaryFunctorOverloads
-                      quickstep_types_operations_binaryoperations_BinaryOperationWrapper)
+                      quickstep_types_operations_binaryoperations_BinaryOperationWrapper
+                      quickstep_utility_meta_Common)
 target_link_libraries(quickstep_types_operations_binaryoperations_AsciiStringBinaryOperations
+                      glog
                       quickstep_types_CharType
                       quickstep_types_IntType
                       quickstep_types_Type
@@ -63,9 +65,7 @@ target_link_libraries(quickstep_types_operations_binaryoperations_AsciiStringBin
                       quickstep_types_VarCharType
                       quickstep_types_operations_OperationUtil
                       quickstep_types_operations_unaryoperations_UnaryOperationWrapper
-                      quickstep_types_port_strnlen
-                      quickstep_utility_TemplateUtil
-                      glog)
+                      quickstep_types_port_strnlen)
 target_link_libraries(quickstep_types_operations_binaryoperations_BinaryOperation
                       quickstep_catalog_CatalogTypedefs
                       quickstep_storage_StorageBlockInfo
@@ -87,7 +87,7 @@ target_link_libraries(quickstep_types_operations_binaryoperations_BinaryOperatio
                       quickstep_types_operations_OperationUtil
                       quickstep_types_operations_binaryoperations_BinaryOperation
                       quickstep_utility_Macros
-                      quickstep_utility_TemplateUtil)
+                      quickstep_utility_meta_Common)
 target_link_libraries(quickstep_types_operations_binaryoperations_CMathBinaryOperations
                       quickstep_types_DoubleType
                       quickstep_types_FloatType
@@ -95,7 +95,7 @@ target_link_libraries(quickstep_types_operations_binaryoperations_CMathBinaryOpe
                       quickstep_types_LongType
                       quickstep_types_operations_OperationUtil
                       quickstep_types_operations_binaryoperations_BinaryOperationWrapper
-                      quickstep_utility_TemplateUtil)
+                      quickstep_utility_meta_Common)
 
 # Module all-in-one library:
 add_library(quickstep_types_operations_binaryoperations ../../../empty_src.cpp)

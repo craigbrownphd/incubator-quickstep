@@ -41,7 +41,7 @@ class Type;
 /**
  * @brief A type representing a 64-bit integer.
  **/
-class LongType : public NumericSuperType<LongType, kLong, std::int64_t> {
+class LongType : public NumericSuperType<kLong> {
  public:
   bool isSafelyCoercibleFrom(const Type &original_type) const override;
 
@@ -65,8 +65,7 @@ class LongType : public NumericSuperType<LongType, kLong, std::int64_t> {
 
  private:
   explicit LongType(const bool nullable)
-      : NumericSuperType<LongType, kLong, std::int64_t>(nullable) {
-  }
+      : NumericSuperType<kLong>(nullable) {}
 
   template <typename, bool> friend class TypeInstance;
 

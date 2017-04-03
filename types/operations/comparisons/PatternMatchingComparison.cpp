@@ -29,7 +29,7 @@
 #include "types/operations/comparisons/ComparisonID.hpp"
 #include "types/operations/comparisons/PatternMatchingComparators.hpp"
 #include "types/operations/comparisons/PatternMatchingComparators-inl.hpp"
-#include "utility/TemplateUtil.hpp"
+#include "utility/meta/Dispatchers.hpp"
 
 #include "glog/logging.h"
 
@@ -121,7 +121,7 @@ UncheckedComparator* PatternMatchingComparison::makeUncheckedComparatorForTypes(
                  << " in PatternMatchinComparison::makeUncheckedComparatorForTypes()";
   }
 
-  return InvokeOnBools(
+  return meta::InvokeOnBools(
       is_like_pattern, is_negation,
       left.isNullable(), right.isNullable(),
       [&](auto is_like_pattern,  // NOLINT(build/c++11)

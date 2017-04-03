@@ -17,21 +17,12 @@
  * under the License.
  **/
 
-#ifndef QUICKSTEP_UTILITY_TEMPLATE_UTIL_HPP_
-#define QUICKSTEP_UTILITY_TEMPLATE_UTIL_HPP_
+#ifndef QUICKSTEP_UTILITY_META_TMP_HPP_
+#define QUICKSTEP_UTILITY_META_TMP_HPP_
 
-#include <cstddef>
-#include <tuple>
-#include <utility>
+#include "utility/meta/Common.hpp"
+#include "utility/meta/Dispatchers.hpp"
+#include "utility/meta/TransitiveClosure.hpp"
+#include "utility/meta/TypeList.hpp"
 
-namespace quickstep {
-
-/** \addtogroup Utility
- *  @{
- */
-
-/** @} */
-
-}  // namespace quickstep
-
-#endif  // QUICKSTEP_UTILITY_TEMPLATE_UTIL_HPP_
+#endif  // QUICKSTEP_UTILITY_META_TMP_HPP_

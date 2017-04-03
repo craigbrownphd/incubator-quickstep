@@ -43,7 +43,7 @@ namespace quickstep {
  *       represented WITHOUT a null-terminator character. Any strings shorter
  *       than the maximum length will have a null-terminator.
  **/
-class CharType : public AsciiStringSuperType<CharType, kChar, kNonNativeInline> {
+class CharType : public AsciiStringSuperType<kChar> {
  public:
   bool isSafelyCoercibleFrom(const Type &original_type) const override;
 
@@ -67,9 +67,7 @@ class CharType : public AsciiStringSuperType<CharType, kChar, kNonNativeInline> 
 
  private:
   CharType(const std::size_t length, const bool nullable)
-      : AsciiStringSuperType<CharType, kChar, kNonNativeInline>(
-            nullable, length, length, length) {
-  }
+      : AsciiStringSuperType<kChar>(nullable, length, length, length) {}
 
   template <typename, bool> friend class TypeInstance;
 

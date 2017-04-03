@@ -27,7 +27,7 @@
 #include <utility>
 
 #include "types/DateOperatorOverloads.hpp"
-#include "utility/TemplateUtil.hpp"
+#include "utility/meta/Common.hpp"
 
 namespace quickstep {
 
@@ -145,8 +145,8 @@ struct ModuloFunctorOverloads;
 template <typename LeftCppType, typename RightCppType>
 struct ModuloFunctorOverloads<
     LeftCppType, RightCppType,
-    std::enable_if_t<EqualsAny<LeftCppType, int, std::int64_t>::value &&
-                     EqualsAny<RightCppType, int, std::int64_t>::value>> {
+    std::enable_if_t<meta::EqualsAny<LeftCppType, int, std::int64_t>::value &&
+                     meta::EqualsAny<RightCppType, int, std::int64_t>::value>> {
   inline auto operator() (const LeftCppType &left,
                           const RightCppType &right) const -> decltype(left % right) {
     return left % right;
@@ -161,8 +161,8 @@ struct ModuloFunctorOverloads<
 template <typename LeftCppType, typename RightCppType>
 struct ModuloFunctorOverloads<
     LeftCppType, RightCppType,
-    std::enable_if_t<EqualsAny<LeftCppType, float, double>::value ||
-                     EqualsAny<RightCppType, float, double>::value>> {
+    std::enable_if_t<meta::EqualsAny<LeftCppType, float, double>::value ||
+                     meta::EqualsAny<RightCppType, float, double>::value>> {
   inline auto operator() (const LeftCppType &left,
                           const RightCppType &right) const -> decltype(std::fmod(left, right)) {
     return std::fmod(left, right);

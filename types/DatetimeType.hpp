@@ -27,6 +27,7 @@
 #include "types/DatetimeLit.hpp"
 #include "types/Type.hpp"
 #include "types/TypeID.hpp"
+#include "types/TypeSynthesizer.hpp"
 #include "utility/Macros.hpp"
 
 namespace quickstep {
@@ -41,7 +42,7 @@ class TypedValue;
  * @brief A type representing the datetime.
  **/
 class DatetimeType
-    : public TypeSynthesizer<DatetimeType, kDatetime, false, kNativeEmbedded, DatetimeLit> {
+    : public TypeSynthesizer<kDatetime> {
  public:
   int getPrintWidth() const override {
     return DatetimeLit::kIsoChars;
@@ -74,10 +75,7 @@ class DatetimeType
 
  private:
   explicit DatetimeType(const bool nullable)
-      : TypeSynthesizer<DatetimeType, kDatetime, false, kNativeEmbedded, DatetimeLit>(
-             Type::kOther, kStaticTypeID, nullable,
-             sizeof(DatetimeLit), sizeof(DatetimeLit)) {
-  }
+      : TypeSynthesizer<kDatetime>(nullable) {}
 
   template <typename, bool> friend class TypeInstance;
 

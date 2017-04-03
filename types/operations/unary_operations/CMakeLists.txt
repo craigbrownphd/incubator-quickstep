@@ -58,7 +58,7 @@ target_link_libraries(quickstep_types_operations_unaryoperations_AsciiStringUnar
                       quickstep_types_operations_OperationUtil
                       quickstep_types_operations_unaryoperations_UnaryOperationWrapper
                       quickstep_types_port_strnlen
-                      quickstep_utility_TemplateUtil)
+                      quickstep_utility_meta_Common)
 target_link_libraries(quickstep_types_operations_unaryoperations_CMathUnaryOperations
                       quickstep_types_DoubleType
                       quickstep_types_FloatType
@@ -66,7 +66,7 @@ target_link_libraries(quickstep_types_operations_unaryoperations_CMathUnaryOpera
                       quickstep_types_LongType
                       quickstep_types_operations_OperationUtil
                       quickstep_types_operations_unaryoperations_UnaryOperationWrapper
-                      quickstep_utility_TemplateUtil)
+                      quickstep_utility_meta_Common)
 target_link_libraries(quickstep_types_operations_unaryoperations_CastOperation
                       glog
                       quickstep_types_CharType
@@ -115,7 +115,7 @@ target_link_libraries(quickstep_types_operations_unaryoperations_SubstringOperat
                       quickstep_types_operations_unaryoperations_UnaryOperation
                       quickstep_types_port_strnlen
                       quickstep_utility_Macros
-                      quickstep_utility_TemplateUtil)
+                      quickstep_utility_meta_Dispatchers)
 target_link_libraries(quickstep_types_operations_unaryoperations_UnaryOperation
                       quickstep_catalog_CatalogTypedefs
                       quickstep_types_TypedValue

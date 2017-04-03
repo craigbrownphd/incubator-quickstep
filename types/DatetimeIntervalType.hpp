@@ -28,6 +28,7 @@
 #include "types/IntervalLit.hpp"
 #include "types/Type.hpp"
 #include "types/TypeID.hpp"
+#include "types/TypeSynthesizer.hpp"
 #include "types/TypedValue.hpp"
 #include "utility/Macros.hpp"
 
@@ -40,9 +41,7 @@ namespace quickstep {
 /**
  * @brief A type representing the datetime interval.
  **/
-class DatetimeIntervalType :
-    public TypeSynthesizer<DatetimeIntervalType, kDatetimeInterval,
-                           false, kNativeEmbedded, DatetimeIntervalLit> {
+class DatetimeIntervalType : public TypeSynthesizer<kDatetimeInterval> {
  public:
   int getPrintWidth() const override {
     return DatetimeIntervalLit::kPrintingChars;
@@ -59,11 +58,7 @@ class DatetimeIntervalType :
 
  private:
   explicit DatetimeIntervalType(const bool nullable)
-      : TypeSynthesizer<DatetimeIntervalType, kDatetimeInterval,
-                        false, kNativeEmbedded, DatetimeIntervalLit>(
-             Type::kOther, kStaticTypeID, nullable,
-             sizeof(DatetimeIntervalLit), sizeof(DatetimeIntervalLit)) {
-  }
+      : TypeSynthesizer<kDatetimeInterval>(nullable) {}
 
   template <typename, bool> friend class TypeInstance;
 

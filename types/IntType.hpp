@@ -40,7 +40,7 @@ class Type;
 /**
  * @brief A type representing a 32-bit integer.
  **/
-class IntType : public NumericSuperType<IntType, kInt, int> {
+class IntType : public NumericSuperType<kInt> {
  public:
   bool isSafelyCoercibleFrom(const Type &original_type) const override;
 
@@ -64,8 +64,7 @@ class IntType : public NumericSuperType<IntType, kInt, int> {
 
  private:
   explicit IntType(const bool nullable)
-      : NumericSuperType<IntType, kInt, int>(nullable) {
-  }
+      : NumericSuperType<kInt>(nullable) {}
 
   template <typename, bool> friend class TypeInstance;
 

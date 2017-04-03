@@ -27,6 +27,7 @@
 #include "types/IntervalLit.hpp"
 #include "types/Type.hpp"
 #include "types/TypeID.hpp"
+#include "types/TypeSynthesizer.hpp"
 #include "types/TypedValue.hpp"
 #include "utility/Macros.hpp"
 
@@ -39,9 +40,7 @@ namespace quickstep {
 /**
  * @brief A type representing the year-month interval.
  **/
-class YearMonthIntervalType :
-    public TypeSynthesizer<YearMonthIntervalType, kYearMonthInterval,
-                           false, kNativeEmbedded, YearMonthIntervalLit> {
+class YearMonthIntervalType : public TypeSynthesizer<kYearMonthInterval> {
  public:
   int getPrintWidth() const override {
     return YearMonthIntervalLit::kPrintingChars;
@@ -58,11 +57,7 @@ class YearMonthIntervalType :
 
  private:
   explicit YearMonthIntervalType(const bool nullable)
-      : TypeSynthesizer<YearMonthIntervalType, kYearMonthInterval,
-                        false, kNativeEmbedded, YearMonthIntervalLit>(
-            Type::kOther, kStaticTypeID, nullable,
-            sizeof(YearMonthIntervalLit), sizeof(YearMonthIntervalLit)) {
-  }
+      : TypeSynthesizer<kYearMonthInterval>(nullable) {}
 
   template <typename, bool> friend class TypeInstance;
 

@@ -37,6 +37,7 @@
 #include "types/YearMonthIntervalType.hpp"
 #include "types/operations/binary_operations/ArithmeticBinaryFunctorOverloads.hpp"
 #include "types/operations/binary_operations/BinaryOperationWrapper.hpp"
+#include "utility/meta/Common.hpp"
 
 namespace quickstep {
 
@@ -65,27 +66,27 @@ struct ArithmeticBinaryFunctor : public BinaryFunctor<LeftT, RightT, ResultT> {
 template <typename LeftT, typename RightT, typename ResultT>
 using AddFunctor = ArithmeticBinaryFunctor<LeftT, RightT, ResultT,
                                            AddFunctorOverloads,
-                                           StringLiteral<'+'>>;
+                                           meta::StringLiteral<'+'>>;
 
 template <typename LeftT, typename RightT, typename ResultT>
 using SubtractFunctor = ArithmeticBinaryFunctor<LeftT, RightT, ResultT,
                                                 SubtractFunctorOverloads,
-                                                StringLiteral<'-'>>;
+                                                meta::StringLiteral<'-'>>;
 
 template <typename LeftT, typename RightT, typename ResultT>
 using MultiplyFunctor = ArithmeticBinaryFunctor<LeftT, RightT, ResultT,
                                                 MultiplyFunctorOverloads,
-                                                StringLiteral<'*'>>;
+                                                meta::StringLiteral<'*'>>;
 
 template <typename LeftT, typename RightT, typename ResultT>
 using DivideFunctor = ArithmeticBinaryFunctor<LeftT, RightT, ResultT,
                                               DivideFunctorOverloads,
-                                              StringLiteral<'/'>>;
+                                              meta::StringLiteral<'/'>>;
 
 template <typename LeftT, typename RightT, typename ResultT>
 using ModuloFunctor = ArithmeticBinaryFunctor<LeftT, RightT, ResultT,
                                               ModuloFunctorOverloads,
-                                              StringLiteral<'%'>>;
+                                              meta::StringLiteral<'%'>>;
 
 // ----------------------------------------------------------------------------
 // Packs of functors:
@@ -140,11 +141,11 @@ using MultiplyBinaryFunctorPack = FunctorPack<
     BinaryFunctorCrossProductPack<
         std::tuple<DatetimeIntervalType, YearMonthIntervalType>,
         std::tuple<IntType, LongType, FloatType, DoubleType>,
-        MultiplyFunctor, PairSelectorLeft>,
+        MultiplyFunctor, meta::PairSelectorLeft>,
     BinaryFunctorCrossProductPack<
         std::tuple<IntType, LongType, FloatType, DoubleType>,
         std::tuple<DatetimeIntervalType, YearMonthIntervalType>,
-        MultiplyFunctor, PairSelectorRight>
+        MultiplyFunctor, meta::PairSelectorRight>
 >;
 
 using DivideBinaryFunctorPack = FunctorPack<
@@ -157,7 +158,7 @@ using DivideBinaryFunctorPack = FunctorPack<
     BinaryFunctorCrossProductPack<
         std::tuple<DatetimeIntervalType, YearMonthIntervalType>,
         std::tuple<IntType, LongType, FloatType, DoubleType>,
-        DivideFunctor, PairSelectorLeft>
+        DivideFunctor, meta::PairSelectorLeft>
 >;
 
 using ModuloBinaryFunctorPack = FunctorPack<

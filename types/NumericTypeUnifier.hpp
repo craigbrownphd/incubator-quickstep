@@ -49,16 +49,13 @@ struct NumericTypeUnifier;
 
 namespace internal {
 
-using NumericTypeSafeCoersionClosure = TransitiveClosure<NumericTypeSafeCoersions>;
-
 template <typename LeftType, typename RightType, typename EnableT = void>
 struct NumericTypeUnifierHelper;
 
 template <typename LeftType, typename RightType>
 struct NumericTypeUnifierHelper<
     LeftType, RightType,
-    std::enable_if_t<NumericTypeSafeCoersionClosure::contains<
-                         TypeList<LeftType, RightType>>::value>> {
+    std::enable_if_t<NumericTypeSafeCoercibility<LeftType, RightType>::value>> {
   typedef RightType type;
 };
 
@@ -66,13 +63,11 @@ template <typename LeftType, typename RightType>
 struct NumericTypeUnifierHelper<
     LeftType, RightType,
     std::enable_if_t<!std::is_same<LeftType, RightType>::value &&
-                     NumericTypeSafeCoersionClosure::contains<
-                         TypeList<RightType, LeftType>>::value>> {
+                     NumericTypeSafeCoercibility<RightType, LeftType>::value>> {
   typedef LeftType type;
 };
 
-// Explicit template specializations for all combinations of builtin numeric
-// types.
+// Explicit template specializations
 template<>
 struct NumericTypeUnifierHelper<LongType, FloatType> {
   typedef DoubleType type;

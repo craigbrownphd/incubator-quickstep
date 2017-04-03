@@ -57,6 +57,7 @@ add_library(quickstep_types_TypeFactory TypeFactory.cpp TypeFactory.hpp)
 add_library(quickstep_types_TypeID TypeID.cpp TypeID.hpp)
 add_library(quickstep_types_TypeIDSelectors ../empty_src.cpp TypeIDSelectors.hpp)
 add_library(quickstep_types_TypeRegistrar ../empty_src.cpp TypeRegistrar.hpp)
+add_library(quickstep_types_TypeSynthesizer ../empty_src.cpp TypeSynthesizer.hpp)
 add_library(quickstep_types_TypeUtil ../empty_src.cpp TypeUtil.hpp)
 add_library(quickstep_types_Type_proto ${types_Type_proto_srcs})
 add_library(quickstep_types_TypedValue TypedValue.cpp TypedValue.hpp)
@@ -67,7 +68,8 @@ add_library(quickstep_types_YearMonthIntervalType YearMonthIntervalType.cpp Year
 # Link dependencies:
 target_link_libraries(quickstep_types_AsciiStringSuperType
                       quickstep_types_Type
-                      quickstep_types_TypeID)
+                      quickstep_types_TypeID
+                      quickstep_types_TypeSynthesizer)
 target_link_libraries(quickstep_types_BoolType
                       glog
                       quickstep_types_Type
@@ -95,6 +97,7 @@ target_link_libraries(quickstep_types_DateType
                       quickstep_types_DatetimeLit
                       quickstep_types_Type
                       quickstep_types_TypeID
+                      quickstep_types_TypeSynthesizer
                       quickstep_types_TypedValue
                       quickstep_utility_CheckSnprintf
                       quickstep_utility_Macros)
@@ -104,6 +107,7 @@ target_link_libraries(quickstep_types_DatetimeIntervalType
                       quickstep_types_IntervalParser
                       quickstep_types_Type
                       quickstep_types_TypeID
+                      quickstep_types_TypeSynthesizer
                       quickstep_types_TypedValue
                       quickstep_utility_CheckSnprintf
                       quickstep_utility_Macros)
@@ -114,6 +118,7 @@ target_link_libraries(quickstep_types_DatetimeType
                       quickstep_types_DatetimeLit
                       quickstep_types_Type
                       quickstep_types_TypeID
+                      quickstep_types_TypeSynthesizer
                       quickstep_types_TypedValue
                       quickstep_types_port_gmtime_r
                       quickstep_types_port_timegm
@@ -162,15 +167,20 @@ target_link_libraries(quickstep_types_NullType
                       glog
                       quickstep_types_Type
                       quickstep_types_TypeID
+                      quickstep_types_TypeSynthesizer
                       quickstep_utility_Macros)
 target_link_libraries(quickstep_types_NumericSuperType
                       quickstep_types_NullCoercibilityCheckMacro
+                      quickstep_types_NumericTypeSafeCoercibility
                       quickstep_types_Type
                       quickstep_types_TypeID
+                      quickstep_types_TypeRegistrar
+                      quickstep_types_TypeSynthesizer
                       quickstep_types_TypedValue
-                      quickstep_utility_Macros)
+                      quickstep_utility_Macros
+                      quickstep_utility_meta_TMP)
 target_link_libraries(quickstep_types_NumericTypeSafeCoercibility
-                      quickstep_utility_TemplateUtil)
+                      quickstep_utility_meta_TMP)
 target_link_libraries(quickstep_types_NumericTypeUnifier
                       quickstep_types_NumericTypeSafeCoercibility)
 target_link_libraries(quickstep_types_Type
@@ -178,8 +188,7 @@ target_link_libraries(quickstep_types_Type
                       quickstep_types_Type_proto
                       quickstep_types_TypeID
                       quickstep_types_TypedValue
-                      quickstep_utility_Macros
-                      quickstep_utility_PtrMap)
+                      quickstep_utility_Macros)
 target_link_libraries(quickstep_types_TypeFactory
                       glog
                       quickstep_types_CharType
@@ -203,10 +212,21 @@ target_link_libraries(quickstep_types_TypeID
                       quickstep_utility_Macros)
 target_link_libraries(quickstep_types_TypeIDSelectors
                       quickstep_types_TypeID
-                      quickstep_utility_TemplateUtil)
+                      quickstep_utility_meta_Common)
 target_link_libraries(quickstep_types_TypeRegistrar
+                      quickstep_types_DatetimeLit
+                      quickstep_types_IntervalLit
+                      quickstep_types_Type
                       quickstep_types_TypeID
-                      quickstep_types_TypeIDSelectors)
+                      quickstep_types_TypeIDSelectors
+                      quickstep_utility_meta_Common)
+target_link_libraries(quickstep_types_TypeSynthesizer
+                      quickstep_types_Type
+                      quickstep_types_TypeID
+                      quickstep_types_TypeRegistrar
+                      quickstep_types_Type_proto
+                      quickstep_utility_Macros
+                      quickstep_utility_PtrMap)
 target_link_libraries(quickstep_types_TypeUtil
                       quickstep_types_CharType
                       quickstep_types_DateType
@@ -220,7 +240,6 @@ target_link_libraries(quickstep_types_TypeUtil
                       quickstep_types_Type
                       quickstep_types_TypeID
                       quickstep_types_TypeRegistrar
-                      quickstep_types_Type_proto
                       quickstep_types_VarCharType
                       quickstep_types_YearMonthIntervalType
                       quickstep_utility_Macros)
@@ -256,6 +275,7 @@ target_link_libraries(quickstep_types_YearMonthIntervalType
                       quickstep_types_IntervalParser
                       quickstep_types_Type
                       quickstep_types_TypeID
+                      quickstep_types_TypeSynthesizer
                       quickstep_types_TypedValue
                       quickstep_utility_CheckSnprintf
                       quickstep_utility_Macros)
@@ -288,6 +308,9 @@ target_link_libraries(quickstep_types
                       quickstep_types_TypeErrors
                       quickstep_types_TypeFactory
                       quickstep_types_TypeID
+                      quickstep_types_TypeIDSelectors
+                      quickstep_types_TypeRegistrar
+                      quickstep_types_TypeSynthesizer
                       quickstep_types_TypedValue
                       quickstep_types_TypedValue_proto
                       quickstep_types_VarCharType

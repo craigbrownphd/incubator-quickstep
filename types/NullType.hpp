@@ -26,6 +26,7 @@
 
 #include "types/Type.hpp"
 #include "types/TypeID.hpp"
+#include "types/TypeSynthesizer.hpp"
 #include "utility/Macros.hpp"
 
 #include "glog/logging.h"
@@ -48,7 +49,7 @@ class TypedValue;
  *       a particular operation may accept. It is also assumed that applying
  *       any operation to an argument of NullType always yields NULL values.
  **/
-class NullType : public TypeSynthesizer<NullType, kNullType, false, kNativeEmbedded> {
+class NullType : public TypeSynthesizer<kNullType> {
  public:
   static const NullType& InstanceNonNullable() {
     LOG(FATAL) << "Called NullType::InstanceNonNullable(), "
@@ -87,8 +88,7 @@ class NullType : public TypeSynthesizer<NullType, kNullType, false, kNativeEmbed
   // NOTE(chasseur): NullType requires 0 bytes of inherent storage. It does,
   // however, require a bit in NULL bitmaps.
   NullType(const bool nullable)
-      : TypeSynthesizer<NullType, kNullType, false, kNativeEmbedded>(
-            Type::kOther, kStaticTypeID, true, 0, 0) {
+      : TypeSynthesizer<kNullType>(nullable, 0, 0) {
     DCHECK(nullable);
   }
 

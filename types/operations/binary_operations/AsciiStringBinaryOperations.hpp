@@ -33,7 +33,6 @@
 #include "types/operations/OperationUtil.hpp"
 #include "types/operations/unary_operations/UnaryOperationWrapper.hpp"
 #include "types/port/strnlen.hpp"
-#include "utility/TemplateUtil.hpp"
 
 namespace quickstep {
 

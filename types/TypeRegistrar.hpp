@@ -20,10 +20,15 @@
 #ifndef QUICKSTEP_TYPES_TYPE_REGISTRAR_HPP_
 #define QUICKSTEP_TYPES_TYPE_REGISTRAR_HPP_
 
+#include <cstdint>
 #include <type_traits>
 
+#include "types/DatetimeLit.hpp"
+#include "types/IntervalLit.hpp"
+#include "types/Type.hpp"
 #include "types/TypeID.hpp"
 #include "types/TypeIDSelectors.hpp"
+#include "utility/meta/Common.hpp"
 
 #include "glog/logging.h"
 
@@ -34,30 +39,50 @@ namespace quickstep {
  */
 
 template <TypeID type_id>
-struct TypeClass;
+struct TypeIDTrait;
 
-#define REGISTER_TYPE(T, TID) \
-  class T;\
-  template <> struct TypeClass<TID> { typedef T type; };
+#define REGISTER_TYPE(T, type_id, super_type_id, parameterized, layout, CppType) \
+  class T; \
+  template <> struct TypeIDTrait<type_id> { \
+    typedef T TypeClass; \
+    typedef CppType cpptype; \
+    static constexpr TypeID kStaticTypeID = type_id; \
+    static constexpr Type::SuperTypeID kStaticSuperTypeID = super_type_id; \
+    static constexpr bool kParameterized = parameterized; \
+    static constexpr TypeStorageLayout kLayout = layout; \
+  };
 
-REGISTER_TYPE(IntType, kInt);
-REGISTER_TYPE(LongType, kLong);
-REGISTER_TYPE(FloatType, kFloat);
-REGISTER_TYPE(DoubleType, kDouble);
-REGISTER_TYPE(DateType, kDate);
-REGISTER_TYPE(DatetimeType, kDatetime);
-REGISTER_TYPE(DatetimeIntervalType, kDatetimeInterval);
-REGISTER_TYPE(YearMonthIntervalType, kYearMonthInterval);
-REGISTER_TYPE(CharType, kChar);
-REGISTER_TYPE(VarCharType, kVarChar);
-REGISTER_TYPE(NullType, kNullType);
+REGISTER_TYPE(IntType, kInt, \
+              Type::kNumeric, false, kNativeEmbedded, int);
+REGISTER_TYPE(LongType, kLong, \
+              Type::kNumeric, false, kNativeEmbedded, std::int64_t);
+REGISTER_TYPE(FloatType, kFloat, \
+              Type::kNumeric, false, kNativeEmbedded, float);
+REGISTER_TYPE(DoubleType, kDouble, \
+              Type::kNumeric, false, kNativeEmbedded, double);
+REGISTER_TYPE(DateType, kDate, \
+              Type::kOther, false, kNativeEmbedded, DateLit);
+REGISTER_TYPE(DatetimeType, kDatetime, \
+              Type::kOther, false, kNativeEmbedded, DatetimeLit);
+REGISTER_TYPE(DatetimeIntervalType, kDatetimeInterval, \
+              Type::kOther, false, kNativeEmbedded, DatetimeIntervalLit);
+REGISTER_TYPE(YearMonthIntervalType, kYearMonthInterval, \
+              Type::kOther, false, kNativeEmbedded, YearMonthIntervalLit);
+REGISTER_TYPE(CharType, kChar, \
+              Type::kAsciiString, true, kNonNativeInline, void);
+REGISTER_TYPE(VarCharType, kVarChar, \
+              Type::kAsciiString, true, kOutOfLine, void);
+REGISTER_TYPE(NullType, kNullType, \
+              Type::kOther, false, kNonNativeInline, void);
 
 #undef REGISTER_TYPE
 
+using TypeIDSequenceAll =
+    meta::MakeSequence<static_cast<std::size_t>(kNumTypeIDs)>
+        ::type::template cast_to<TypeID>;
 
 template <typename Selector = TypeIDSelectorAll, typename FunctorT>
 auto InvokeOnTypeID(const TypeID type_id, const FunctorT &functor);
-
 
 namespace internal {
 

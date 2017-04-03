@@ -23,6 +23,7 @@
 #include <type_traits>
 
 #include "types/TypeID.hpp"
+#include "utility/meta/Common.hpp"
 
 #include "glog/logging.h"
 
@@ -46,7 +47,16 @@ struct TypeIDSelectorEqualsAny;
 
 // Forward declaration
 template <TypeID type_id>
-struct TypeClass;
+struct TypeIDTrait;
+
+struct TypeIDSelectorAll {
+  template <typename TypeIDConstant, typename FunctorT, typename EnableT = void>
+  struct Implementation {
+    inline static auto Invoke(const FunctorT &functor) {
+      return functor(TypeIDConstant());
+    }
+  };
+};
 
 struct TypeIDSelectorNumeric {
   template <typename TypeIDConstant, typename FunctorT, typename EnableT = void>
@@ -65,7 +75,7 @@ struct TypeIDSelectorNumeric {
 template <typename TypeIDConstant, typename FunctorT>
 struct TypeIDSelectorNumeric::Implementation<
     TypeIDConstant, FunctorT,
-    std::enable_if_t<TypeClass<TypeIDConstant::value>::type
+    std::enable_if_t<TypeIDTrait<TypeIDConstant::value>
                          ::kStaticSuperTypeID == Type::kNumeric>> {
   inline static auto Invoke(const FunctorT &functor) {
     return functor(TypeIDConstant());
@@ -92,8 +102,8 @@ template <typename TypeIDConstant, typename FunctorT>
 struct TypeIDSelectorEqualsAny<candidates...>::Implementation<
     TypeIDConstant, FunctorT,
     std::enable_if_t<
-        EqualsAny<TypeIDConstant,
-                  std::integral_constant<TypeID, candidates>...>::value>> {
+        meta::EqualsAny<TypeIDConstant,
+                        std::integral_constant<TypeID, candidates>...>::value>> {
   inline static auto Invoke(const FunctorT &functor) {
     return functor(TypeIDConstant());
   }
@@ -120,7 +130,7 @@ template <bool require_non_parameterized>
 template <typename TypeIDConstant, typename FunctorT>
 struct TypeIDSelectorParameterizedHelper<require_non_parameterized>::Implementation<
     TypeIDConstant, FunctorT,
-    std::enable_if_t<TypeClass<TypeIDConstant::value>::type::kParameterized
+    std::enable_if_t<TypeIDTrait<TypeIDConstant::value>::kParameterized
                          ^ require_non_parameterized>> {
   inline static auto Invoke(const FunctorT &functor) {
     return functor(TypeIDConstant());
@@ -128,15 +138,6 @@ struct TypeIDSelectorParameterizedHelper<require_non_parameterized>::Implementat
 };
 
 }  // namespace internal
-
-struct TypeIDSelectorAll {
-  template <typename TypeIDConstant, typename FunctorT, typename EnableT = void>
-  struct Implementation {
-    inline static auto Invoke(const FunctorT &functor) {
-      return functor(TypeIDConstant());
-    }
-  };
-};
 
 struct TypeIDSelectorNonParameterized
     : internal::TypeIDSelectorParameterizedHelper<true> {};

@@ -27,8 +27,11 @@
 #include "types/NumericTypeSafeCoercibility.hpp"
 #include "types/Type.hpp"
 #include "types/TypeID.hpp"
+#include "types/TypeRegistrar.hpp"
+#include "types/TypeSynthesizer.hpp"
 #include "types/TypedValue.hpp"
 #include "utility/Macros.hpp"
+#include "utility/meta/TMP.hpp"
 
 namespace quickstep {
 
@@ -40,10 +43,8 @@ namespace quickstep {
  * @brief Templatized superclass for Numeric types. Contains code common to all
  *        Numeric types.
  **/
-template <typename TypeClass, TypeID type_id, typename CppType>
-class NumericSuperType
-    : public TypeSynthesizer<TypeClass, type_id,
-                             false, kNativeEmbedded, CppType, Type::kNumeric> {
+template <TypeID type_id>
+class NumericSuperType : public TypeSynthesizer<type_id> {
  public:
   bool isSafelyCoercibleFrom(const Type &original_type) const override {
     const auto it = safe_coerce_cache_.find(original_type.getTypeID());
@@ -56,17 +57,34 @@ class NumericSuperType
   }
 
   TypedValue makeZeroValue() const override {
-    return TypedValue(static_cast<CppType>(0));
+    return TypedValue(static_cast<typename TypeIDTrait<type_id>::cpptype>(0));
   }
 
  protected:
   explicit NumericSuperType(const bool nullable)
-      : TypeSynthesizer<TypeClass, type_id,
-                        false, kNativeEmbedded, CppType, Type::kNumeric>(
-            Type::kNumeric, type_id, nullable, sizeof(CppType), sizeof(CppType)) {}
+      : TypeSynthesizer<type_id>(nullable),
+        safe_coerce_cache_(CreateSafeCoercibilityCache()) {}
 
  private:
-  std::unordered_set<TypeID> safe_coerce_cache_;
+  using TargetType = typename TypeIDTrait<type_id>::TypeClass;
+
+  template <typename SourceTypeID>
+  struct SafeCoercibilityFilter {
+    static constexpr bool value =
+        NumericTypeSafeCoercibility<
+            typename TypeIDTrait<SourceTypeID::value>::TypeClass,
+            TargetType>::value;
+  };
+
+  inline static auto CreateSafeCoercibilityCache() {
+    using SourceTypeIDs = TypeIDSequenceAll::template bind_to<meta::TypeList>;
+    using ResultTypeIDs = SourceTypeIDs::template filter<SafeCoercibilityFilter>;
+
+    return ResultTypeIDs::template as_sequence<TypeID>
+        ::template Instantiate<std::unordered_set<TypeID>>();
+  };
+
+  const std::unordered_set<TypeID> safe_coerce_cache_;
 
   DISALLOW_COPY_AND_ASSIGN(NumericSuperType);
 };

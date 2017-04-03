@@ -52,7 +52,7 @@ class TypeUtil {
     return InvokeOnTypeID(
         type_id,
         [&](auto tid) -> bool {  // NOLINT(build/c++11)
-      return TypeClass<decltype(tid)::value>::type::kParameterized;
+      return TypeIDTrait<decltype(tid)::value>::kParameterized;
     });
   }
 

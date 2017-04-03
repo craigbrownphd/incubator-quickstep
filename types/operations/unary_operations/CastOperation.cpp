@@ -195,7 +195,7 @@ UncheckedUnaryOperator* CastOperation::makeUncheckedUnaryOperator(
     return InvokeOnTypeID<TypeIDSelectorEqualsAny<kInt, kLong, kFloat, kDouble>>(
         argument_type_id,
         [&](auto arg_tid) -> UncheckedUnaryOperator* {  // NOLINT(build/c++11)
-      using ArgumentT = typename TypeClass<decltype(arg_tid)::value>::type;
+      using ArgumentT = typename TypeIDTrait<decltype(arg_tid)::value>::TypeClass;
 
       switch (result_type_id) {
         case kInt:  // Fall through
@@ -205,7 +205,7 @@ UncheckedUnaryOperator* CastOperation::makeUncheckedUnaryOperator(
           return InvokeOnTypeID<TypeIDSelectorEqualsAny<kInt, kLong, kFloat, kDouble>>(
               result_type_id,
               [&](auto result_tid) -> UncheckedUnaryOperator* {  // NOLINT(build/c++11)
-            using ResultT = typename TypeClass<decltype(result_tid)::value>::type;
+            using ResultT = typename TypeIDTrait<decltype(result_tid)::value>::TypeClass;
 
             return new UncheckedUnaryOperatorWrapperCodegen<
                 NumericCastToNumericFunctor<ArgumentT, ResultT>>(type, *result_type);
@@ -216,7 +216,7 @@ UncheckedUnaryOperator* CastOperation::makeUncheckedUnaryOperator(
           return InvokeOnTypeID<TypeIDSelectorEqualsAny<kChar, kVarChar>>(
               result_type_id,
               [&](auto result_tid) -> UncheckedUnaryOperator* {  // NOLINT(build/c++11)
-            using ResultT = typename TypeClass<decltype(result_tid)::value>::type;
+            using ResultT = typename TypeIDTrait<decltype(result_tid)::value>::TypeClass;
 
             return new UncheckedUnaryOperatorWrapperCodegen<
                  CastToAsciiStringFunctor<ArgumentT, ResultT>>(
@@ -235,7 +235,7 @@ UncheckedUnaryOperator* CastOperation::makeUncheckedUnaryOperator(
     return InvokeOnTypeID<TypeIDSelectorEqualsAny<kChar, kVarChar>>(
         argument_type_id,
         [&](auto arg_tid) -> UncheckedUnaryOperator* {  // NOLINT(build/c++11)
-      using ArgumentT = typename TypeClass<decltype(arg_tid)::value>::type;
+      using ArgumentT = typename TypeIDTrait<decltype(arg_tid)::value>::TypeClass;
 
       switch (result_type_id) {
         case kInt:  // Fall through
@@ -245,7 +245,7 @@ UncheckedUnaryOperator* CastOperation::makeUncheckedUnaryOperator(
           return InvokeOnTypeID<TypeIDSelectorEqualsAny<kInt, kLong, kFloat, kDouble>>(
               result_type_id,
               [&](auto result_tid) -> UncheckedUnaryOperator* {  // NOLINT(build/c++11)
-            using ResultT = typename TypeClass<decltype(result_tid)::value>::type;
+            using ResultT = typename TypeIDTrait<decltype(result_tid)::value>::TypeClass;
 
             return new UncheckedUnaryOperatorWrapperCodegen<
                 AsciiStringCastToNumericFunctor<
@@ -260,7 +260,7 @@ UncheckedUnaryOperator* CastOperation::makeUncheckedUnaryOperator(
           return InvokeOnTypeID<TypeIDSelectorEqualsAny<kChar, kVarChar>>(
               result_type_id,
               [&](auto result_tid) -> UncheckedUnaryOperator* {  // NOLINT(build/c++11)
-            using ResultT = typename TypeClass<decltype(result_tid)::value>::type;
+            using ResultT = typename TypeIDTrait<decltype(result_tid)::value>::TypeClass;
 
             return new UncheckedUnaryOperatorWrapperCodegen<
                  AsciiStringCastToAsciiStringFunctor<ArgumentT, ResultT>>(

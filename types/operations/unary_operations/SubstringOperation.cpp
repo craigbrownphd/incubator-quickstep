@@ -25,7 +25,7 @@
 #include "types/Type.hpp"
 #include "types/TypeID.hpp"
 #include "types/TypedValue.hpp"
-#include "utility/TemplateUtil.hpp"
+#include "utility/meta/Dispatchers.hpp"
 
 #include "glog/logging.h"
 
@@ -49,7 +49,7 @@ UncheckedUnaryOperator* SubstringOperation::makeUncheckedUnaryOperator(
   const Type *result_type = getResultType(type, static_arguments);
   DCHECK(result_type != nullptr);
 
-  return InvokeOnBools(
+  return meta::InvokeOnBools(
       input_null_terminated, type.isNullable(),
       [&](auto is_null_terminated,  // NOLINT(build/c++11)
           auto is_nullable) -> UncheckedUnaryOperator* {

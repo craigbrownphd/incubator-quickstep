@@ -20,7 +20,7 @@
 #ifndef QUICKSTEP_TYPES_NUMERIC_TYPE_SAFE_COERCIBILITY_HPP_
 #define QUICKSTEP_TYPES_NUMERIC_TYPE_SAFE_COERCIBILITY_HPP_
 
-#include "utility/TemplateUtil.hpp"
+#include "utility/meta/TMP.hpp"
 
 namespace quickstep {
 
@@ -34,22 +34,24 @@ class LongType;
  *  @{
  */
 
-using NumericTypeSafeCoersions = TypeList<
-    TypeList<BoolType, IntType>,
-    TypeList<IntType, FloatType>,
-    TypeList<IntType, LongType>,
-    TypeList<FloatType, DoubleType>,
-    TypeList<LongType, DoubleType>
->;
+template <typename LeftType, typename RightType>
+using IsSafelyCoercible = meta::TypeList<LeftType, RightType>;
 
-using NumericTypeSafeCoersionClosure = TransitiveClosure<NumericTypeSafeCoersions>;
+using NumericTypeSafeCoersionPartialOrder = meta::TypeList<
+    IsSafelyCoercible<BoolType, IntType>,
+    IsSafelyCoercible<IntType, FloatType>,
+    IsSafelyCoercible<IntType, LongType>,
+    IsSafelyCoercible<FloatType, DoubleType>,
+    IsSafelyCoercible<LongType, DoubleType>>;
 
+using NumericTypeSafeCoersionClosure =
+    meta::TransitiveClosure<NumericTypeSafeCoersionPartialOrder>;
 
 template <typename LeftType, typename RightType>
 struct NumericTypeSafeCoercibility {
   static constexpr bool value =
       NumericTypeSafeCoersionClosure::contains<
-          TypeList<LeftType, RightType>>::value;
+          IsSafelyCoercible<LeftType, RightType>>::value;
 };
 
 /** @} */

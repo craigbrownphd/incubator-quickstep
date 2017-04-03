@@ -56,7 +56,7 @@ const Type& TypeFactory::GetType(const TypeID id,
   return *InvokeOnTypeID<TypeIDSelectorNonParameterized>(
       id,
       [&](auto id) -> const Type* {  // NOLINT(build/c++11)
-    return &TypeClass<decltype(id)::value>::type::Instance(nullable);
+    return &TypeIDTrait<decltype(id)::value>::TypeClass::Instance(nullable);
   });
 }
 
@@ -70,7 +70,7 @@ const Type& TypeFactory::GetType(const TypeID id,
   return *InvokeOnTypeID<TypeIDSelectorParameterized>(
       id,
       [&](auto id) -> const Type* {  // NOLINT(build/c++11)
-    return &TypeClass<decltype(id)::value>::type::Instance(nullable, length);
+    return &TypeIDTrait<decltype(id)::value>::TypeClass::Instance(nullable, length);
   });
 }
 
@@ -121,7 +121,8 @@ const Type* TypeFactory::GetMostSpecificType(const Type &first, const Type &seco
 const Type* TypeFactory::GetUnifyingType(const Type &first, const Type &second) {
   const Type *unifier = nullptr;
   if (first.isNullable() || second.isNullable()) {
-    unifier = GetMostSpecificType(first.getNullableVersion(), second.getNullableVersion());
+    unifier = GetMostSpecificType(first.getNullableVersion(),
+                                  second.getNullableVersion());
     if (unifier == nullptr) {
       if (((first.getTypeID() == kLong) && (second.getTypeID() == kFloat))
             || ((first.getTypeID() == kFloat) && (second.getTypeID() == kLong))) {

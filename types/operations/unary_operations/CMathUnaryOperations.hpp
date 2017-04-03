@@ -29,7 +29,7 @@
 #include "types/LongType.hpp"
 #include "types/operations/OperationUtil.hpp"
 #include "types/operations/unary_operations/UnaryOperationWrapper.hpp"
-#include "utility/TemplateUtil.hpp"
+#include "utility/meta/Common.hpp"
 
 namespace quickstep {
 
@@ -70,43 +70,43 @@ inline std::int64_t CMathRound(const double arg) {
 using CMathUnaryFunctorPack = FunctorPack<
 // abs
     CMathUnaryFunctor<IntType, IntType,
-                      std::abs, StringLiteral<'a','b','s'>>,
+                      std::abs, meta::StringLiteral<'a','b','s'>>,
     CMathUnaryFunctor<LongType, LongType,
-                      std::abs, StringLiteral<'a','b','s'>>,
+                      std::abs, meta::StringLiteral<'a','b','s'>>,
     CMathUnaryFunctor<FloatType, FloatType,
-                      std::fabs, StringLiteral<'a','b','s'>>,
+                      std::fabs, meta::StringLiteral<'a','b','s'>>,
     CMathUnaryFunctor<DoubleType, DoubleType,
-                      std::fabs, StringLiteral<'a','b','s'>>,
+                      std::fabs, meta::StringLiteral<'a','b','s'>>,
 // sqrt
     CMathUnaryFunctor<FloatType, FloatType,
-                      std::sqrt, StringLiteral<'s','q','r','t'>>,
+                      std::sqrt, meta::StringLiteral<'s','q','r','t'>>,
     CMathUnaryFunctor<DoubleType, DoubleType,
-                      std::sqrt, StringLiteral<'s','q','r','t'>>,
+                      std::sqrt, meta::StringLiteral<'s','q','r','t'>>,
 // exp
     CMathUnaryFunctor<FloatType, FloatType,
-                      std::exp, StringLiteral<'e','x','p'>>,
+                      std::exp, meta::StringLiteral<'e','x','p'>>,
     CMathUnaryFunctor<DoubleType, DoubleType,
-                      std::exp, StringLiteral<'e','x','p'>>,
+                      std::exp, meta::StringLiteral<'e','x','p'>>,
 // log
     CMathUnaryFunctor<FloatType, FloatType,
-                      std::log, StringLiteral<'l','o','g'>>,
+                      std::log, meta::StringLiteral<'l','o','g'>>,
     CMathUnaryFunctor<DoubleType, DoubleType,
-                      std::log, StringLiteral<'l','o','g'>>,
+                      std::log, meta::StringLiteral<'l','o','g'>>,
 // ceil
     CMathUnaryFunctor<FloatType, FloatType,
-                      std::ceil, StringLiteral<'c','e','i','l'>>,
+                      std::ceil, meta::StringLiteral<'c','e','i','l'>>,
     CMathUnaryFunctor<DoubleType, DoubleType,
-                      std::ceil, StringLiteral<'c','e','i','l'>>,
+                      std::ceil, meta::StringLiteral<'c','e','i','l'>>,
 // floor
     CMathUnaryFunctor<FloatType, FloatType,
-                      std::floor, StringLiteral<'f','l','o','o','r'>>,
+                      std::floor, meta::StringLiteral<'f','l','o','o','r'>>,
     CMathUnaryFunctor<DoubleType, DoubleType,
-                      std::floor, StringLiteral<'f','l','o','o','r'>>,
+                      std::floor, meta::StringLiteral<'f','l','o','o','r'>>,
 // round
     CMathUnaryFunctor<FloatType, LongType,
-                      CMathRound, StringLiteral<'r','o','u','n','d'>>,
+                      CMathRound, meta::StringLiteral<'r','o','u','n','d'>>,
     CMathUnaryFunctor<DoubleType, LongType,
-                      CMathRound, StringLiteral<'r','o','u','n','d'>>
+                      CMathRound, meta::StringLiteral<'r','o','u','n','d'>>
 >;
 
 /** @} */

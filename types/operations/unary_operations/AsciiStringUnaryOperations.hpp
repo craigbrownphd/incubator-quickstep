@@ -33,7 +33,7 @@
 #include "types/operations/OperationUtil.hpp"
 #include "types/operations/unary_operations/UnaryOperationWrapper.hpp"
 #include "types/port/strnlen.hpp"
-#include "utility/TemplateUtil.hpp"
+#include "utility/meta/Common.hpp"
 
 namespace quickstep {
 
@@ -96,12 +96,12 @@ struct AsciiStringTranformFunctor : public UnaryFunctor<ArgumentT, ArgumentT> {
 template <typename ArgumentT>
 using AsciiStringToLowerCaseFunctor =
     AsciiStringTranformFunctor<ArgumentT, std::tolower,
-                               StringLiteral<'t', 'o', 'l', 'o', 'w', 'e', 'r'>>;
+                               meta::StringLiteral<'t', 'o', 'l', 'o', 'w', 'e', 'r'>>;
 
 template <typename ArgumentT>
 using AsciiStringToUpperCaseFunctor =
     AsciiStringTranformFunctor<ArgumentT, std::toupper,
-                               StringLiteral<'t', 'o', 'u', 'p', 'p', 'e', 'r'>>;
+                               meta::StringLiteral<'t', 'o', 'u', 'p', 'p', 'e', 'r'>>;
 
 using AsciiStringUnaryFunctorPack = FunctorPack<
 // length
