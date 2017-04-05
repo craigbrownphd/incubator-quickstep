@@ -17,34 +17,48 @@
  * under the License.
  **/
 
-#include "expressions/scalar/Scalar.hpp"
+#ifndef QUICKSTEP_EXPRESSIONS_SCALAR_SCALAR_CACHE_HPP_
+#define QUICKSTEP_EXPRESSIONS_SCALAR_SCALAR_CACHE_HPP_
 
+#include <unordered_map>
+
+#include "types/containers/ColumnVector.hpp"
 #include "utility/Macros.hpp"
+
+#include "glog/logging.h"
 
 namespace quickstep {
 
-const char *Scalar::kScalarDataSourceNames[] = {
-  "Literal",
-  "Attribute",
-  "UnaryExpression",
-  "BinaryExpression",
-  "SharedExpression",
-  "SimpleCase"
+/** \addtogroup Expressions
+ *  @{
+ */
+
+class ScalarCache {
+ public:
+  ScalarCache() {}
+
+  inline bool has(const int share_id) const {
+    return cv_cache_.find(share_id) != cv_cache_.end();
+  }
+
+  inline ColumnVectorPtr get(const int share_id) const {
+    DCHECK(has(share_id));
+    return cv_cache_.at(share_id);
+  }
+
+  inline void set(const int share_id, const ColumnVectorPtr &cv) {
+    DCHECK(!has(share_id));
+    cv_cache_.emplace(share_id, cv);
+  }
+
+ private:
+  std::unordered_map<int, ColumnVectorPtr> cv_cache_;
+
+  DISALLOW_COPY_AND_ASSIGN(ScalarCache);
 };
 
-const TypedValue& Scalar::getStaticValue() const {
-  FATAL_ERROR("Called getStaticValue() on a Scalar which does not have a static value");
-}
-
-void Scalar::getFieldStringItems(
-    std::vector<std::string> *inline_field_names,
-    std::vector<std::string> *inline_field_values,
-    std::vector<std::string> *non_container_child_field_names,
-    std::vector<const Expression*> *non_container_child_fields,
-    std::vector<std::string> *container_child_field_names,
-    std::vector<std::vector<const Expression*>> *container_child_fields) const {
-  inline_field_names->emplace_back("result_type");
-  inline_field_values->emplace_back(type_.getName());
-}
+/** @} */
 
 }  // namespace quickstep
+
+#endif  // QUICKSTEP_EXPRESSIONS_SCALAR_SCALAR_CACHE_HPP_

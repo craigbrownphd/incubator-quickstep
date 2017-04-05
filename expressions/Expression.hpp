@@ -17,34 +17,31 @@
  * under the License.
  **/
 
-#include "expressions/scalar/Scalar.hpp"
+#ifndef QUICKSTEP_EXPRESSIONS_SCALAR_EXPRESSION_HPP_
+#define QUICKSTEP_EXPRESSIONS_SCALAR_EXPRESSION_HPP_
 
 #include "utility/Macros.hpp"
+#include "utility/TreeStringSerializable.hpp"
 
 namespace quickstep {
 
-const char *Scalar::kScalarDataSourceNames[] = {
-  "Literal",
-  "Attribute",
-  "UnaryExpression",
-  "BinaryExpression",
-  "SharedExpression",
-  "SimpleCase"
+/** \addtogroup Expressions
+ *  @{
+ */
+
+class Expression : public TreeStringSerializable<const Expression*> {
+ public:
+  virtual ~Expression() {}
+
+ protected:
+  Expression() {}
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Expression);
 };
 
-const TypedValue& Scalar::getStaticValue() const {
-  FATAL_ERROR("Called getStaticValue() on a Scalar which does not have a static value");
-}
-
-void Scalar::getFieldStringItems(
-    std::vector<std::string> *inline_field_names,
-    std::vector<std::string> *inline_field_values,
-    std::vector<std::string> *non_container_child_field_names,
-    std::vector<const Expression*> *non_container_child_fields,
-    std::vector<std::string> *container_child_field_names,
-    std::vector<std::vector<const Expression*>> *container_child_fields) const {
-  inline_field_names->emplace_back("result_type");
-  inline_field_values->emplace_back(type_.getName());
-}
+/** @} */
 
 }  // namespace quickstep
+
+#endif  // QUICKSTEP_EXPRESSIONS_SCALAR_EXPRESSION_HPP_

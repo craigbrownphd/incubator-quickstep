@@ -17,47 +17,39 @@
  * under the License.
  **/
 
-#ifndef QUICKSTEP_QUERY_OPTIMIZER_EXPRESSIONS_EXPRESSION_TYPE_HPP_
-#define QUICKSTEP_QUERY_OPTIMIZER_EXPRESSIONS_EXPRESSION_TYPE_HPP_
+#ifndef QUICKSTEP_UTILITY_HASH_ERROR_HPP_
+#define QUICKSTEP_UTILITY_HASH_ERROR_HPP_
+
+#include <exception>
 
 namespace quickstep {
-namespace optimizer {
-namespace expressions {
 
-/** \addtogroup OptimizerExpressions
+/** \addtogroup Utility
  *  @{
  */
 
-/**
- * @brief Optimizer expression types.
- **/
-enum class ExpressionType {
-  kAggregateFunction = 0,
-  kAlias,
-  kAttributeReference,
-  kBinaryExpression,
-  kCast,
-  kCommonSubexpression,
-  kComparisonExpression,
-  kExists,
-  kInTableQuery,
-  kInValueList,
-  kLogicalAnd,
-  kLogicalOr,
-  kLogicalNot,
-  kPredicateLiteral,
-  kScalarLiteral,
-  kSearchedCase,
-  kSimpleCase,
-  kSubqueryExpression,
-  kUnaryExpression,
-  kWindowAggregateFunction
+class HashNotSupported : public std::exception {
+ public:
+  /**
+   * @brief Constructor.
+   *
+   * @param message The error message.
+   **/
+  HashNotSupported(const std::string &message)
+      : message_(message) {}
+
+  ~HashNotSupported() throw() {}
+
+  virtual const char* what() const throw() {
+    return message_.c_str();
+  }
+
+ private:
+  const std::string message_;
 };
 
 /** @} */
 
-}  // namespace expressions
-}  // namespace optimizer
 }  // namespace quickstep
 
-#endif /* QUICKSTEP_QUERY_OPTIMIZER_EXPRESSIONS_EXPRESSION_TYPE_HPP_ */
+#endif  // QUICKSTEP_UTILITY_HASH_ERROR_HPP_

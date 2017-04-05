@@ -17,21 +17,18 @@
  * under the License.
  **/
 
-#include "query_optimizer/expressions/UnaryExpression.hpp"
+#include "query_optimizer/expressions/CommonSubexpression.hpp"
 
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include "expressions/scalar/ScalarUnaryExpression.hpp"
+#include "expressions/scalar/ScalarSharedExpression.hpp"
 #include "query_optimizer/OptimizerTree.hpp"
 #include "query_optimizer/expressions/ExprId.hpp"
 #include "query_optimizer/expressions/Expression.hpp"
 #include "query_optimizer/expressions/PatternMatcher.hpp"
 #include "query_optimizer/expressions/Scalar.hpp"
-#include "types/operations/unary_operations/UnaryOperation.hpp"
-#include "types/operations/unary_operations/UnaryOperationID.hpp"
-#include "utility/HashPair.hpp"
 
 #include "glog/logging.h"
 
@@ -39,47 +36,31 @@ namespace quickstep {
 namespace optimizer {
 namespace expressions {
 
-std::string UnaryExpression::getName() const {
-  return operation_.getName();
-}
-
-ExpressionPtr UnaryExpression::copyWithNewChildren(
+ExpressionPtr CommonSubexpression::copyWithNewChildren(
     const std::vector<ExpressionPtr> &new_children) const {
   DCHECK_EQ(new_children.size(), children().size());
   DCHECK(SomeScalar::Matches(new_children[0]));
-  return UnaryExpression::Create(
-      operation_, std::static_pointer_cast<const Scalar>(new_children[0]));
+  return CommonSubexpression::Create(
+      common_subexpression_id_,
+      std::static_pointer_cast<const Scalar>(new_children[0]));
 }
 
-::quickstep::Scalar* UnaryExpression::concretize(
+::quickstep::Scalar* CommonSubexpression::concretize(
     const std::unordered_map<ExprId, const CatalogAttribute*> &substitution_map) const {
-  return new ::quickstep::ScalarUnaryExpression(
-      operation_, operand_->concretize(substitution_map));
+  return new ::quickstep::ScalarSharedExpression(
+      common_subexpression_id_, operand_->concretize(substitution_map));
 }
 
-std::size_t UnaryExpression::computeHash() const {
-  return CombineHashes(
-      CombineHashes(static_cast<std::size_t>(ExpressionType::kUnaryExpression),
-                    static_cast<std::size_t>(operation_.getUnaryOperationID())),
-      operand_->hash());
-}
-
-bool UnaryExpression::equals(const ScalarPtr &other) const {
-  UnaryExpressionPtr expr;
-  if (SomeUnaryExpression::MatchesWithConditionalCast(other, &expr)) {
-    return operation_.getUnaryOperationID() == expr->operation_.getUnaryOperationID()
-           && operand_->equals(expr->operand_);
-  }
-  return false;
-}
-
-void UnaryExpression::getFieldStringItems(
+void CommonSubexpression::getFieldStringItems(
     std::vector<std::string> *inline_field_names,
     std::vector<std::string> *inline_field_values,
     std::vector<std::string> *non_container_child_field_names,
     std::vector<OptimizerTreeBaseNodePtr> *non_container_child_fields,
     std::vector<std::string> *container_child_field_names,
     std::vector<std::vector<OptimizerTreeBaseNodePtr>> *container_child_fields) const {
+  inline_field_names->push_back("common_subexpression_id");
+  inline_field_values->push_back(std::to_string(common_subexpression_id_));
+
   non_container_child_field_names->push_back("Operand");
   non_container_child_fields->push_back(operand_);
 }

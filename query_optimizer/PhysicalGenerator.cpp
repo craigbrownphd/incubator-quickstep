@@ -27,6 +27,7 @@
 #include "query_optimizer/logical/Logical.hpp"
 #include "query_optimizer/physical/Physical.hpp"
 #include "query_optimizer/rules/AttachLIPFilters.hpp"
+#include "query_optimizer/rules/CommonSubexpressionExtraction.hpp"
 #include "query_optimizer/rules/FuseAggregateJoin.hpp"
 #include "query_optimizer/rules/InjectJoinFilters.hpp"
 #include "query_optimizer/rules/PruneColumns.hpp"
@@ -148,6 +149,8 @@ P::PhysicalPtr PhysicalGenerator::optimizePlan() {
 
   rules.emplace_back(new FuseAggregateJoin());
 
+  rules.emplace_back(new CommonSubexpressionExtraction(optimizer_context_));
+
   // NOTE(jianqiao): Adding rules after InjectJoinFilters (or AttachLIPFilters) requires
   // extra handling of LIPFilterConfiguration for transformed nodes. So currently it is
   // suggested that all the new rules be placed before this point.
@@ -165,7 +168,8 @@ P::PhysicalPtr PhysicalGenerator::optimizePlan() {
              << physical_plan_->toString();
   }
 
-  DVLOG(4) << "Optimized physical plan:\n" << physical_plan_->toString();
+//  DVLOG(4) << "Optimized physical plan:\n" << physical_plan_->toString();
+  std::cerr << "Optimized physical plan:\n" << physical_plan_->toString();
 
   if (FLAGS_visualize_plan) {
     quickstep::PlanVisualizer plan_visualizer;

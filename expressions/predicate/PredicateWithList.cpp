@@ -17,56 +17,37 @@
  * under the License.
  **/
 
-#include "expressions/predicate/Predicate.hpp"
+#include "expressions/predicate/PredicateWithList.hpp"
 
-#include "storage/TupleIdSequence.hpp"
-#include "storage/ValueAccessor.hpp"
-#include "utility/Macros.hpp"
+#include <string>
+#include <vector>
 
 namespace quickstep {
 
-const char *Predicate::kPredicateTypeNames[] = {
-  "True",
-  "False",
-  "Comparison",
-  "Negation",
-  "Conjunction",
-  "Disjunction"
-};
-
-bool Predicate::getStaticResult() const {
-  FATAL_ERROR("Called getStaticResult() on a predicate which has no static result");
-}
-
-TupleIdSequence* Predicate::GenerateSequenceForStaticResult(
-    ValueAccessor *accessor,
-    const TupleIdSequence *filter,
-    const TupleIdSequence *existence_map,
-    const bool static_result) {
-  TupleIdSequence *result = new TupleIdSequence(accessor->getEndPositionVirtual());
-  if (static_result) {
-    if (filter != nullptr) {
-      // '*filter' will always be a subset of '*existence_map'.
-      result->assignFrom(*filter);
-    } else if (existence_map != nullptr) {
-      result->assignFrom(*existence_map);
-    } else {
-      result->setRange(0, result->length(), true);
-    }
-  }
-  return result;
-}
-
-void Predicate::getFieldStringItems(
+void PredicateWithList::getFieldStringItems(
     std::vector<std::string> *inline_field_names,
     std::vector<std::string> *inline_field_values,
     std::vector<std::string> *non_container_child_field_names,
     std::vector<const Expression*> *non_container_child_fields,
     std::vector<std::string> *container_child_field_names,
     std::vector<std::vector<const Expression*>> *container_child_fields) const {
-  if (hasStaticResult()) {
-    inline_field_names->emplace_back("static_result");
-    inline_field_values->emplace_back(getStaticResult() ? "true" : "false");
+  Predicate::getFieldStringItems(inline_field_names,
+                                 inline_field_values,
+                                 non_container_child_field_names,
+                                 non_container_child_fields,
+                                 container_child_field_names,
+                                 container_child_fields);
+
+  container_child_field_names->emplace_back("static_operand_list");
+  container_child_fields->emplace_back();
+  for (const auto &static_operand : static_operand_list_) {
+    container_child_fields->back().emplace_back(&static_operand);
+  }
+
+  container_child_field_names->emplace_back("dynamic_operand_list");
+  container_child_fields->emplace_back();
+  for (const auto &dynamic_operand : dynamic_operand_list_) {
+    container_child_fields->back().emplace_back(&dynamic_operand);
   }
 }
 

@@ -17,9 +17,10 @@
  * under the License.
  **/
 
-#ifndef QUICKSTEP_EXPRESSIONS_SCALAR_SCALAR_ATTRIBUTE_HPP_
-#define QUICKSTEP_EXPRESSIONS_SCALAR_SCALAR_ATTRIBUTE_HPP_
+#ifndef QUICKSTEP_EXPRESSIONS_SCALAR_SCALAR_SHARED_EXPRESSION_HPP_
+#define QUICKSTEP_EXPRESSIONS_SCALAR_SCALAR_SHARED_EXPRESSION_HPP_
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -34,7 +35,6 @@
 
 namespace quickstep {
 
-class CatalogAttribute;
 class ScalarCache;
 class ValueAccessor;
 
@@ -44,24 +44,25 @@ struct SubBlocksReference;
  *  @{
  */
 
-/**
- * @brief Scalars which are attribute values from tuples.
- **/
-class ScalarAttribute : public Scalar {
+class ScalarSharedExpression : public Scalar {
  public:
   /**
    * @brief Constructor.
-   *
-   * @param attribute The attribute to use.
    **/
-  explicit ScalarAttribute(const CatalogAttribute &attribute);
+  ScalarSharedExpression(const int shared_id, Scalar *operand);
+
+  /**
+   * @brief Destructor.
+   **/
+  ~ScalarSharedExpression() override {
+  }
 
   serialization::Scalar getProto() const override;
 
   Scalar* clone() const override;
 
   ScalarDataSource getDataSource() const override {
-    return kAttribute;
+    return kSharedExpression;
   }
 
   TypedValue getValueForSingleTuple(const ValueAccessor &accessor,
@@ -75,9 +76,13 @@ class ScalarAttribute : public Scalar {
       const relation_id right_relation_id,
       const tuple_id right_tuple_id) const override;
 
-  attribute_id getAttributeIdForValueAccessor() const override;
+  bool hasStaticValue() const override {
+    return operand_->hasStaticValue();
+  }
 
-  relation_id getRelationIdForValueAccessor() const override;
+  const TypedValue& getStaticValue() const override {
+    return operand_->getStaticValue();
+  }
 
   ColumnVectorPtr getAllValues(ValueAccessor *accessor,
                                const SubBlocksReference *sub_blocks_ref,
@@ -91,10 +96,6 @@ class ScalarAttribute : public Scalar {
       const std::vector<std::pair<tuple_id, tuple_id>> &joined_tuple_ids,
       ScalarCache *scalar_cache) const override;
 
-  const CatalogAttribute& getAttribute() const {
-    return attribute_;
-  }
-
  protected:
   void getFieldStringItems(
       std::vector<std::string> *inline_field_names,
@@ -104,14 +105,15 @@ class ScalarAttribute : public Scalar {
       std::vector<std::string> *container_child_field_names,
       std::vector<std::vector<const Expression*>> *container_child_fields) const override;
 
-  const CatalogAttribute &attribute_;
-
  private:
-  DISALLOW_COPY_AND_ASSIGN(ScalarAttribute);
+  const int share_id_;
+  std::unique_ptr<Scalar> operand_;
+
+  DISALLOW_COPY_AND_ASSIGN(ScalarSharedExpression);
 };
 
 /** @} */
 
 }  // namespace quickstep
 
-#endif  // QUICKSTEP_EXPRESSIONS_SCALAR_SCALAR_ATTRIBUTE_HPP_
+#endif  // QUICKSTEP_EXPRESSIONS_SCALAR_SCALAR_SHARED_EXPRESSION_HPP_

@@ -38,6 +38,7 @@
 #include "expressions/aggregation/AggregationHandle.hpp"
 #include "expressions/predicate/Predicate.hpp"
 #include "expressions/scalar/Scalar.hpp"
+#include "expressions/scalar/ScalarCache.hpp"
 #include "storage/AggregationOperationState.pb.h"
 #include "storage/CollisionFreeVectorTable.hpp"
 #include "storage/HashTableFactory.hpp"
@@ -491,9 +492,10 @@ void AggregationOperationState::aggregateBlock(const block_id input_block,
     SubBlocksReference sub_blocks_ref(tuple_store,
                                       block->getIndices(),
                                       block->getIndicesConsistent());
+    ScalarCache scalar_cache;
     for (const auto &expression : non_trivial_expressions_) {
       non_trivial_results->addColumn(
-          expression->getAllValues(accessor, &sub_blocks_ref));
+          expression->getAllValues(accessor, &sub_blocks_ref, &scalar_cache));
     }
   }
 
